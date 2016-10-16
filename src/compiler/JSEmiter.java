@@ -3,8 +3,7 @@ package eightBit.compile;
 import eightBit.js.*;
 import java.util.*;
 
-public interface JSEmiter{
-	
+public interface JSEmiter{	
    default JSAst PROGRAM(List<JSAst> functions){ return new JSProgram(functions);} 
    
    default JSAst BLOCK(List<JSAst> members){ return new JSBlock(members);}

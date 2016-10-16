@@ -1,1 +1,1 @@
-function helloWorld(s){ds=s+x*y/z*w;return ds;};
+algoalgoalgoalgoalgoalgofunction helloWorld(s){ds=s+x*y/z*w;return ds;};
