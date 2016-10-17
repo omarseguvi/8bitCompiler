@@ -30,12 +30,6 @@ public interface JSEmiter{
    default ASMDFunction DFUNCTION(ASMId id){
      return new ASMDFunction(id);
    }
-   //default JSId  ID(String value){return new JSId(value);}
-
-   /*default JFunction FUNCTION(JSId id, List<JSAst> formals, JSAst body){
-      return new JSFunction(id, formals, body);
-   }
-
 /*
    default JSIf IF(JSAst c, JSAst t, JSAst e){
        return new JSIf(c, e, t);

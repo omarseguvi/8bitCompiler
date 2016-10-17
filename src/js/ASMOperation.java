@@ -3,7 +3,7 @@ import java.io.*;
 
 
 public class ASMOperation implements ASMAst{
-  private String  operator;
+  private String  operator; //ver si lo cambio por un id
   private ASMAst  loperand; //operador izquierdo
   private ASMAst  roperand; //operador derecho
 
@@ -21,7 +21,10 @@ public void genCode(PrintStream out){
     out.println(operator + " " + loperand);
   }
   else{
-    out.println(operator + " " + loperand + ", " + roperand);
+    out.println(operator);
+    loperand.genCode(out);
+    out.print(", ");
+    roperand.genCode(out);
   }
 }
 

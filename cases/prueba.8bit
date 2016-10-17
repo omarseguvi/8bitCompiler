@@ -1,17 +1,8 @@
 fun prueba(a,b)
 let{
  c = 5;
- d = 6;
- e = 7
+ d = "hola";
+ e = "caca"
 }{
-  return 2 + 3;
-}
-
-fun xx()
-let{
-  l = 6;
-  j = 3
-}
-{
-  return 2 + 3;
+ c = 2 + 3;
 }

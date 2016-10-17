@@ -7,6 +7,8 @@ public class ASMDFunction implements ASMAst{
    static private ASMId UNK = new ASMId("");
    private ASMId name;
    private List<ASMAst> data; //guardar los params de la funcion
+
+   //podria guardar una lista con las instrucciones
    //Constructores
    public ASMDFunction(List<ASMAst> formals){
      this(UNK, formals);
@@ -37,18 +39,4 @@ public class ASMDFunction implements ASMAst{
                   //out.format("\t%s_%s: DB 0;",this.name.getValue(),((ASMId)f).getValue()
      }
    }
-
-   /*public void genCode(PrintStream out){
-       out.format("function %s(", this.name.getValue());
-	   if (this.formals != null)
-	      this.formals
-	          .stream()
-	          .filter(f -> f != null)
-	          .forEach(f -> f.genCode(out));
-
-	   out.print("){");
-	   if (this.body != null)
-	      this.body.genCode(out);
-	   out.print("};");
-   }*/
 }

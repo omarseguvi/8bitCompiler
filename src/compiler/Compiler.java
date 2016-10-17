@@ -27,6 +27,8 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    public void genCode(){
       //this.statements.stream()
 	                 //.forEach( t -> t.genCode());
+      //Aqui se llamaria para que pinte el .init: Mov D, 232 JMP main
+      System.out.print(".init:\n\tMOV D , 232\n\tJMP main\n"); //cambiar esto despues...
       this.izquierda.stream().forEach( t -> t.genCode());
    }
    public ASMAst compile(ParseTree tree){
@@ -41,8 +43,6 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    }
    @Override
    public ASMAst visitEightFunction(EightBitParser.EightFunctionContext ctx){
-    //Dividir los datos en las dos listas TO DO
-    //Hacer la clase ASMDFunction
     ASMId id = (ASMId)visit(ctx.id()); //id para el data
     ASMAst data = visit(ctx.formals());
     EightBitParser.LetStatementContext letStatement = ctx.funBody().letStatement();
@@ -196,6 +196,10 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
     //return NUM(Integer.valueOf(ctx.NUMBER().getText())); Esto lo hago por el momento
    }
 
+   @Override
+   public ASMAst visitExprString(EightBitParser.ExprStringContext ctx){
+     return ID(ctx.STRING().getText()); //esto para que le ponga las comillas a los string :D
+   }
    /*
    @Override
    public JSAst visitExprTrue(EightBitParser.ExprTrueContext ctx){
