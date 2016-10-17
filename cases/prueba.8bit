@@ -4,5 +4,5 @@ let{
  d = "hola";
  e = "caca"
 }{
- c = 2 + 3;
+ return  2 + 3;
 }
