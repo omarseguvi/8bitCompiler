@@ -5,7 +5,5 @@
 	prueba_d: DB 6 DB 0;
 	prueba_e: DB 7 DB 0;
 .xx_data:
-	xx_k: DB 0;
-	xx_c: DB 0;
 	xx_l: DB 6 DB 0;
 	xx_j: DB 3 DB 0;

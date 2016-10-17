@@ -41,7 +41,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    }
    @Override
    public ASMAst visitEightFunction(EightBitParser.EightFunctionContext ctx){
-      //Dividir los datos en las dos listas TO DO
+    //Dividir los datos en las dos listas TO DO
     //Hacer la clase ASMDFunction
     ASMId id = (ASMId)visit(ctx.id()); //id para el data
     ASMAst data = visit(ctx.formals());

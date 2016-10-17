@@ -7,7 +7,7 @@ let{
   return 2 + 3;
 }
 
-fun xx(k,c)
+fun xx()
 let{
   l = 6;
   j = 3
