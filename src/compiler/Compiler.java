@@ -16,6 +16,7 @@ import java.util.stream.*;
 
 public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    protected ASMAst program;
+   private int a;
    public ASMAst getProgram(){
 	   return this.program;
    }
@@ -32,6 +33,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
       this.izquierda.stream().forEach( t -> t.genCode());
    }
    public ASMAst compile(ParseTree tree){
+      this.a = 0;
       return visit(tree);
    }
    @Override
@@ -53,32 +55,27 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
     }
     else
       dataFunction = DFUNCTION(id,DATA(BLOCK(((ASMBlock)data).getMembers())));
-
     this.izquierda.add(dataFunction);
 
      /// Aqui seguiria lo de la derecha
+    ASMAst code = visit(ctx.funBody());
     this.derecha.add(id);
+
     return dataFunction;
-    //
-    /*JSId id = (JSId)visit(ctx.id());
-	  JSAst f = visit(ctx.formals());
-	  JSAst body = visit(ctx.funBody());
-	  JSAst function = FUNCTION(id, FORMALS(f), body);
-	  this.statements.add(function);
-	  return function;*/
    }
+
    /*@Override
    public JSAst visitEmptyStatement(EightBitParser.EmptyStatementContext ctx){
       return EMPTY();
 
    }
-
+*/
    @Override
-   public JSAst visitReturnStatement(EightBitParser.ReturnStatementContext ctx){
-      return RET(visit(ctx.expr()));
-
+   public ASMAst visitReturnStatement(EightBitParser.ReturnStatementContext ctx){
+     ASMAst expr = visit(ctx.expr());
+     return expr;
+     //ASMAst ret = OPERATION( RET, null, null);
    }
-   */
    /*
    @Override
    public JSAst visitAssignStatement(EightBitParser.AssignStatementContext ctx){
@@ -88,25 +85,22 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    */
    @Override
    public ASMAst visitBlockStatement(EightBitParser.BlockStatementContext ctx){
-
-    /*EightBitParser.ClosedListContext closedList = ctx.closedList();
-      return (closedList == null ) ? BLOCK()
-	                               : visit(closedList);*/
-      return new ASMId("CACA");
+     EightBitParser.ClosedListContext closedList = ctx.closedList();
+      return (closedList == null ) ? CBLOCK()
+	                               : visit(closedList);
    }
-   /*
-   @Override
-   public JSAst visitClosedList(EightBitParser.ClosedListContext ctx){
-					   return  BLOCK(ctx.closedStatement().stream()
-	                                                      .map( c -> visit(c))
-										                  .collect(Collectors.toList()));
 
-   }*/
+   @Override
+   public ASMAst visitClosedList(EightBitParser.ClosedListContext ctx){
+					   return  CBLOCK(ctx.closedStatement()
+                              .stream()
+	                            .map( c -> visit(c))
+						                  .collect(Collectors.toList()));
+
+   }
 
    @Override
    public ASMAst visitLetStatement(EightBitParser.LetStatementContext ctx){
-     //Aqui es donde tenemos que meter en el nodo de la izquierda
-     //las variables locales
      //Tengo que traerme una lista con todos los objetos ASMVar
      EightBitParser.AssignStmtListContext assignList = ctx.assignStmtList();
      return (assignList == null) ? BLOCK()
@@ -145,53 +139,68 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
    @Override
     public ASMAst visitArithOperation(EightBitParser.ArithOperationContext ctx) {
-      //sacar el nombre del operador
-     //String oper = ctx.oper.getType();
-    // ASMNum p1 = (ASMNum)visit(ctx.arithMonom());
-     //ASMNum p2 = (ASMNum)visit(ctx.arithMonom());
 
      if (ctx.oper == null)
 		    return visit(ctx.arithMonom().get(0));
-	   ASMAst oper = ( ctx.oper.getType() == EightBitParser.ADD ) ? ADD : MINUS;
+
+     ASMAst oper = ( ctx.oper.getType() == EightBitParser.ADD ) ? ADD : MINUS;
 
      List<ASMAst> exprs = ctx.arithMonom().stream()
 	                                        .map( c -> visit(c) )
 										                      .collect(Collectors.toList());
+
 	   return exprs.stream()
 	               .skip(1)
 				         .reduce(exprs.get(0), (opers, expr) ->
-	                              OPERATION(oper, opers , expr));
+	                              OPERATION((ASMId)oper, opers , expr));
     }
 
     @Override
     public ASMAst visitArithMonom(EightBitParser.ArithMonomContext ctx){
 		ASMAst left = visit(ctx.arithSingle());
-		return (ctx.operTDArithSingle() == null)
-		       ? left
-		       :ctx.operTDArithSingle().stream()
-	                                   .map( c -> visit(c) )
-									   .reduce(left, (opers, expr)
-									                      -> FOLD_LEFT(opers , expr));
-   }
 
+    if(ctx.operTDArithSingle() == null){
+      if(this.a == 0){
+        this.a = 1;
+        return OPERATION((ASMId)POPA, left, null);
+      }
+      else{
+        this.a = 0;
+        return OPERATION((ASMId)POPB, left, null);
+      }
+    }
+    else
+      return ctx.operTDArithSingle()
+                .stream()
+                .map( c -> visit(c) )
+                .reduce(left,(opers, expr)->FOLD_LEFT(opers , expr));
+/*
+    return (ctx.operTDArithSingle() == null)
+		       ? left
+		       : ctx.operTDArithSingle()
+                .stream()
+	              .map( c -> visit(c) )
+						    .reduce(left,(opers, expr)->FOLD_LEFT(opers , expr));*/
+   }
+/*
+   @Override
+   public ASMAst visitArithSingle(EightBitParser.ArithIdSingleContext ctx){
+     return OPERATION((ASMId)PUSH,visit(ctx.id()), null);
+   }*/
    @Override
    public ASMAst visitOperTDArithSingle(EightBitParser.OperTDArithSingleContext ctx){
 	   //System.err.println(" OperTDArithSingle " + ctx.getText() + ctx.oper);
 	   ASMAst oper = ( ctx.oper.getType() == EightBitParser.MUL ) ? MUL : DIV;
 	   ASMAst right = visit(ctx.arithSingle());
-	   return OPERATION(oper, NULL, right);
+	   return OPERATION((ASMId)oper, NULL, right);
    }
    @Override
    public ASMAst visitArithIdSingle(EightBitParser.ArithIdSingleContext ctx){
-      return visit(ctx.id()); // ignoring by now arguments!!
+      return OPERATION((ASMId)PUSH,visit(ctx.id()), null);
+      //return visit(ctx.id()); // ignoring by now arguments!!
    }
    @Override
    public ASMAst visitExprNum(EightBitParser.ExprNumContext ctx){
-     //sacar los numeros
-    //ASMNum numero =  NUM(Integer.valueOf(ctx.NUMBER().getText()));
-      //this.derecha.add(numero);
-      //System.out.println(((ASMNum)derecha.get(2)).getValue());
-        //return numero;
         return  ID(ctx.NUMBER().getText());
     //return NUM(Integer.valueOf(ctx.NUMBER().getText())); Esto lo hago por el momento
    }
