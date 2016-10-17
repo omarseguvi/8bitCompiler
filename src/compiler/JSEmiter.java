@@ -7,6 +7,9 @@ public interface JSEmiter{
    default ASMAst PROGRAM(List<ASMAst> functions){ return new ASMProgram(functions);}
 
    default ASMAst BLOCK(List<ASMAst> members){ return new ASMBlock(members);}
+   default ASMAst BLOCK(List<ASMAst> members, List<ASMAst> vars){
+     return new ASMBlock(members,vars);
+   }
    default ASMAst BLOCK(){ return new ASMBlock(Arrays.asList());}
 
    /*default JSAst EMPTY(){
@@ -15,10 +18,17 @@ public interface JSEmiter{
 
    default ASMId ID(String value){return new ASMId(value);}
 
+   default ASMVar VAR(ASMId name, ASMId value){
+     return new ASMVar(name,value);
+   }
+
    default ASMNum NUM(int value){ return new ASMNum(value);}
 
    default ASMDFunction DFUNCTION(ASMId id, List<ASMAst> data){
      return new ASMDFunction(id,data);
+   }
+   default ASMDFunction DFUNCTION(ASMId id){
+     return new ASMDFunction(id);
    }
    //default JSId  ID(String value){return new JSId(value);}
 

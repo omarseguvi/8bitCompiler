@@ -45,12 +45,20 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
     //Hacer la clase ASMDFunction
     ASMId id = (ASMId)visit(ctx.id()); //id para el data
     ASMAst data = visit(ctx.formals());
-    ASMAst vars = visit(ctx.funBody().letStatement());
-    //Objetdo DFunction //falta sacar los let... y asi
-    ASMAst dataFunction = DFUNCTION(id, DATA(data));
+    EightBitParser.LetStatementContext letStatement = ctx.funBody().letStatement();
+    ASMAst dataFunction;
+    if(letStatement != null){
+      ASMAst vars = visit(letStatement);
+       dataFunction = DFUNCTION(id, DATA(BLOCK(((ASMBlock)data).getMembers(),((ASMBlock)vars).getMembers())));
+    }
+    else
+      dataFunction = DFUNCTION(id,DATA(BLOCK(((ASMBlock)data).getMembers())));
+
     this.izquierda.add(dataFunction);
+
+     /// Aqui seguiria lo de la derecha
     this.derecha.add(id);
-    return id;
+    return dataFunction;
     //
     /*JSId id = (JSId)visit(ctx.id());
 	  JSAst f = visit(ctx.formals());
@@ -70,18 +78,23 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
       return RET(visit(ctx.expr()));
 
    }
+   */
+   /*
    @Override
    public JSAst visitAssignStatement(EightBitParser.AssignStatementContext ctx){
 	  return ASSIGN(visit(ctx.id()), visit(ctx.expr()));
 
    }
+   */
    @Override
-   public JSAst visitBlockStatement(EightBitParser.BlockStatementContext ctx){
+   public ASMAst visitBlockStatement(EightBitParser.BlockStatementContext ctx){
 
-    EightBitParser.ClosedListContext closedList = ctx.closedList();
+    /*EightBitParser.ClosedListContext closedList = ctx.closedList();
       return (closedList == null ) ? BLOCK()
-	                               : visit(closedList);
+	                               : visit(closedList);*/
+      return new ASMId("CACA");
    }
+   /*
    @Override
    public JSAst visitClosedList(EightBitParser.ClosedListContext ctx){
 					   return  BLOCK(ctx.closedStatement().stream()
@@ -93,14 +106,23 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    @Override
    public ASMAst visitLetStatement(EightBitParser.LetStatementContext ctx){
      //Aqui es donde tenemos que meter en el nodo de la izquierda
-     //las variables locales;
+     //las variables locales
+     //Tengo que traerme una lista con todos los objetos ASMVar
+     EightBitParser.AssignStmtListContext assignList = ctx.assignStmtList();
+     return (assignList == null) ? BLOCK()
+                                 : visit(assignList);
+   }
 
-     EightBitParser.IdListContext idList = ctx.idList();
-     ASMAst vars = (idList == null) ? BLOCK()
-                                    : visit(idList);
-     ASMAst valvars = ()
-     System.out.println("llegando al let statement");
-     return new ASMId("CACA");
+   @Override
+   public ASMAst visitVarAssignStatement(EightBitParser.VarAssignStatementContext ctx){
+     return VAR(((ASMId)visit(ctx.id())),((ASMId)visit(ctx.expr())));
+   }
+
+   @Override
+   public ASMAst visitAssignStmtList(EightBitParser.AssignStmtListContext ctx){
+     return BLOCK(ctx.varAssignStatement().stream()
+                     .map(c -> visit(c))
+                     .collect(Collectors.toList()));
    }
 
    @Override
@@ -166,11 +188,12 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    @Override
    public ASMAst visitExprNum(EightBitParser.ExprNumContext ctx){
      //sacar los numeros
-    ASMNum numero =  NUM(Integer.valueOf(ctx.NUMBER().getText()));
-      this.derecha.add(numero);
+    //ASMNum numero =  NUM(Integer.valueOf(ctx.NUMBER().getText()));
+      //this.derecha.add(numero);
       //System.out.println(((ASMNum)derecha.get(2)).getValue());
-        return numero;
-    //  return NUM(Double.valueOf(ctx.NUMBER().getText()));
+        //return numero;
+        return  ID(ctx.NUMBER().getText());
+    //return NUM(Integer.valueOf(ctx.NUMBER().getText())); Esto lo hago por el momento
    }
 
    /*

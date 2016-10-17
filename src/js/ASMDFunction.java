@@ -6,7 +6,7 @@ import java.io.*;
 public class ASMDFunction implements ASMAst{
    static private ASMId UNK = new ASMId("");
    private ASMId name;
-   private List<ASMAst> data; //guardar todos lo datos de la funcion -> params y local variables
+   private List<ASMAst> data; //guardar los params de la funcion
    //Constructores
    public ASMDFunction(List<ASMAst> formals){
      this(UNK, formals);
@@ -15,6 +15,11 @@ public class ASMDFunction implements ASMAst{
    public ASMDFunction(ASMId name, List<ASMAst> data){
      this.name = name;
      this.data = data;
+   }
+
+   public ASMDFunction(ASMId name){
+     this.name = name;
+     this.data = null;
    }
 
 //Probar esto lo del out.format

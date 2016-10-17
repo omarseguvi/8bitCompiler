@@ -1,7 +1,17 @@
 fun prueba(a,b)
 let{
  c = 5;
- d = 6
+ d = 6;
+ e = 7
 }{
+  return 2 + 3;
+}
+
+fun xx(k,c)
+let{
+  l = 6;
+  j = 3
+}
+{
   return 2 + 3;
 }
