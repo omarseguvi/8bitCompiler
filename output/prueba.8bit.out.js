@@ -7,3 +7,5 @@
 	prueba_c: DB 5 DB 0;
 	prueba_d: DB "hola" DB 0;
 	prueba_e: DB "caca" DB 0;
+prueba:
+23ADD A, B

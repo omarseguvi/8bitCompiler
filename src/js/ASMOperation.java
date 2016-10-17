@@ -15,9 +15,14 @@ public ASMOperation (ASMId operator,ASMAst loperand, ASMAst roperand){
 
 public void genCode(PrintStream out){
   if(loperand != null && roperand != null ){
+    loperand.genCode();
+    roperand.genCode();
+    operator.genCode();
     //out.println(operator);
   }
   else if(roperand != null ){
+    operator.genCode();
+    roperand.genCode();
     //out.println(operator + " " + loperand);
   }
   else{

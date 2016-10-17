@@ -31,6 +31,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
       //Aqui se llamaria para que pinte el .init: Mov D, 232 JMP main
       System.out.print(".init:\n\tMOV D , 232\n\tJMP main\n"); //cambiar esto despues...
       this.izquierda.stream().forEach( t -> t.genCode());
+      this.derecha.stream().forEach(t -> t.genCode());
    }
    public ASMAst compile(ParseTree tree){
       this.a = 0;
@@ -50,7 +51,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
     EightBitParser.LetStatementContext letStatement = ctx.funBody().letStatement();
     ASMAst dataFunction;
     if(letStatement != null){
-      ASMAst vars = visit(letStatement);
+      ASMAst vars = visit(letStatement.assignStmtList());
        dataFunction = DFUNCTION(id, DATA(BLOCK(((ASMBlock)data).getMembers(),((ASMBlock)vars).getMembers())));
     }
     else
@@ -58,8 +59,9 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
     this.izquierda.add(dataFunction);
 
      /// Aqui seguiria lo de la derecha
-    ASMAst code = visit(ctx.funBody());
-    this.derecha.add(id);
+    ASMAst code = visit(ctx.funBody().letStatement().closedStatement()); //despues hacer validacion
+    ASMAst codeFunction = CFUNCTION(id, DATA(CBLOCK(((ASMCBlock)code).getMembers())));
+    this.derecha.add(codeFunction);
 
     return dataFunction;
    }
@@ -74,7 +76,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    public ASMAst visitReturnStatement(EightBitParser.ReturnStatementContext ctx){
      ASMAst expr = visit(ctx.expr());
      return expr;
-     //ASMAst ret = OPERATION( RET, null, null);
+     //ASMAst ret = OPERATION( RET, null, null); despues ponerlo porque de algun modo hay que agregarlo al final
    }
    /*
    @Override
@@ -83,11 +85,12 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
    }
    */
+
    @Override
    public ASMAst visitBlockStatement(EightBitParser.BlockStatementContext ctx){
-     EightBitParser.ClosedListContext closedList = ctx.closedList();
+      EightBitParser.ClosedListContext closedList = ctx.closedList();
       return (closedList == null ) ? CBLOCK()
-	                               : visit(closedList);
+	                                 : visit(closedList);
    }
 
    @Override
