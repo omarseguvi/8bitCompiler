@@ -20,8 +20,8 @@ public class ASMCBlock implements ASMAst{
 
    public void genCode(PrintStream out){
        if(this.members != null)
-       this.members.stream().filter(t -> t != null);
-	                          //.forEach( t -> out.format("\t%s_%s: DB 0;\n",name.getValue(),((ASMId)t).getValue()) );
+       this.members.stream().filter(t -> t != null)
+	                          .forEach( t -> t.genCode(out));
    }
 
 }

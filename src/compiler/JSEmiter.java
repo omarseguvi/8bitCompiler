@@ -13,10 +13,10 @@ public interface JSEmiter{
    }
    default ASMAst BLOCK(){ return new ASMBlock(Arrays.asList());}
 
-   default ASMCBlock CBLOCK(List<ASMAst> members){
+   default ASMAst CBLOCK(List<ASMAst> members){
      return new ASMCBlock(members);
    }
-   default ASMCBlock CBLOCK(){
+   default ASMAst CBLOCK(){
      return new ASMCBlock(Arrays.asList());
    }
 

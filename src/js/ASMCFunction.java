@@ -31,7 +31,7 @@ public class ASMCFunction implements ASMAst{
        this.instrucciones.stream()
                          .filter(f -> f != null)
                          .forEach( f -> {
-                           ((ASMBlock)f).setName(this.name); //Le seteo el nombre para que la otra clase pueda imprimir fun_n: blabla
+                           ((ASMCBlock)f).setName(this.name); //Le seteo el nombre para que la otra clase pueda imprimir fun_n: blabla
                            f.genCode(out);
                          });
      }
