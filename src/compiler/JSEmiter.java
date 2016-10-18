@@ -33,8 +33,6 @@ public interface JSEmiter{
      return new ASMVar(new ASMId(name));
    }
 
-   default ASMNum NUM(int value){ return new ASMNum(value);}
-
    default ASMDFunction DFUNCTION(ASMId id, List<ASMAst> data){
      return new ASMDFunction(id,data);
    }
