@@ -46,10 +46,10 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    @Override
    public ASMAst visitEightFunction(EightBitParser.EightFunctionContext ctx){
 	
-    ASMId id_fun = new IDFunData(ctx.id().ID().getText()); //id para el data
+    ASMId id_fun =  IDFunData(ctx.id().ID().getText()); //id para el data
     this.izquierda.add(id_fun);
-	ASMAst data = visit(ctx.formals());
-	this.izquierda.add(data);
+	ASMAst params = visit(ctx.formals());
+	this.izquierda.add(params);
 	
     EightBitParser.LetStatementContext letStatement = ctx.funBody().letStatement();
     ASMAst dataFunction;
@@ -131,9 +131,10 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    }
    @Override
    public ASMAst visitIdList(EightBitParser.IdListContext ctx){
-	   return  	ctx.id().stream()
-					     .map( c -> new ASMVar(c.ID().getText()))
+				ctx.id().stream()
+					     .map( c -> VAR(c.ID().getText()) )
 					     .collect(Collectors.toList());
+		return null;
 
    }
    @Override
