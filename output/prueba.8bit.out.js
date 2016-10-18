@@ -1,4 +1,4 @@
 .init:
 	MOV D , 232
 	JMP main
-.prueba:
+.prueba_data:
