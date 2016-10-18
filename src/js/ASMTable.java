@@ -18,10 +18,11 @@ public class ASMTable implements ASMAst{
    this.funActual = name;
  }
 
- public void addFun(String key){
+ public String addFun(String key){
    HashMap<String,String> nuevo = new HashMap<>();
    simbolos.put(key,nuevo);
    setFunActual(key);
+   return key;
  }
 
  public String addVar(String var){
@@ -45,7 +46,7 @@ public class ASMTable implements ASMAst{
 	 simbolos.forEach((k,v)->{out.print("\n."+k +"_data: "); genVariables(v,out);});
   }
   
-  public void genVariables(HashMap values, PrintStream out){
+  public void genVariables( HashMap<String, String> values, PrintStream out){
 	  //pregunta si la variable es un string , para saber como imprimirlo en 8bit assembler .
 	  values.forEach((k,v)->out.print( ((String)k).matches(".*_String_.*") ? "\n\t"+k+ ": DB "+ v +"\n\t\t\tDB 0;"
 										:"\n\t"+v+": DB 0;"));

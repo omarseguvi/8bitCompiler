@@ -46,12 +46,10 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 	   return this.program = PROGRAM(this.statements);
    }
    @Override
-   public ASMAst visitEightFunction(EightBitParser.EightFunctionContext ctx){
-	this.simbolTable.addFun(ctx.id().ID().getText());   
+   public ASMAst visitEightFunction(EightBitParser.EightFunctionContext ctx){ 
+	ASMId id= (ASMId)visit(ctx.id());
 	visit(ctx.formals());
 	visit(ctx.funBody());
-	
-	
 	
     return null;
    }
@@ -95,19 +93,13 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 			return this.simbolTable; 
 	}
 
-   @Override
-   public ASMAst visitFormals(EightBitParser.FormalsContext ctx){
-	   return  visit(ctx.idList());
-   }
-   @Override
-   public ASMAst visitIdList(EightBitParser.IdListContext ctx){
-			ctx.id().stream()
-					.forEach(e -> this.simbolTable.addVar(e.ID().getText()));
-		return this.simbolTable;
-   }
+	
    @Override
    public ASMAst visitId(EightBitParser.IdContext ctx){
-	  return  ID(ctx.ID().getText());
+	   //pregunta si el string es un id de una funcion o de una variable
+	  String value = ctx.ID().getText();
+	  return ctx.getParent() instanceof EightBitParser.EightFunctionContext ?
+								ID( this.simbolTable.addFun(value)): ID( this.simbolTable.addVar(value)); 
    }
 
    @Override
@@ -169,28 +161,26 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    }
    @Override
    public ASMAst visitArithIdSingle(EightBitParser.ArithIdSingleContext ctx){
-      return OPERATION((ASMId)PUSH,visit(ctx.id()), null);
-      //return visit(ctx.id()); // ignoring by now arguments!!
+		if(ctx.arguments()!=null)
+			System.err.println("es una funcion " + ctx.id().ID());
+		else
+			System.err.println("es una variable " + ctx.id().ID());
+	  return null;//OPERATION((ASMId)PUSH,visit(ctx.id()), null);
    }
    @Override
    public ASMAst visitExprNum(EightBitParser.ExprNumContext ctx){
         return  ID(ctx.NUMBER().getText());
-    //return NUM(Integer.valueOf(ctx.NUMBER().getText())); Esto lo hago por el momento
    }
 
    @Override
    public ASMAst visitExprString(EightBitParser.ExprStringContext ctx){
-		this.simbolTable.addString(ctx.getText());
-		return ID(ctx.STRING().getText()); 
+		return ID(   this.simbolTable.addString(ctx.getText()) ); 
    }
-   /*
-   @Override
-   public JSAst visitExprTrue(EightBitParser.ExprTrueContext ctx){
-      return TRUE;
+   
+   
+   @Override 
+   public ASMAst visitCallStatement(EightBitParser.CallStatementContext ctx) { 
+		return visitChildren(ctx); 
    }
-   @Override
-   public JSAst visitExprFalse(EightBitParser.ExprFalseContext ctx){
-      return FALSE;
-   }
-*/
+
 }
