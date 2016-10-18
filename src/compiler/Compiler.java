@@ -27,8 +27,6 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    protected List<ASMAst> derecha = new ArrayList<>();
 
    public void genCode(){
-      //this.statements.stream()
-	                 //.forEach( t -> t.genCode());
       //Aqui se llamaria para que pinte el .init: Mov D, 232 JMP main
       System.out.print(".init:\n\tMOV D , 232\n\tJMP main\n"); //cambiar esto despues...
       this.izquierda.stream().forEach( t -> t.genCode());
@@ -47,11 +45,17 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    }
    @Override
    public ASMAst visitEightFunction(EightBitParser.EightFunctionContext ctx){
-    ASMId id = (ASMId)visit(ctx.id()); //id para el data
-    ASMAst data = visit(ctx.formals());
+	
+    ASMId id_fun = new IDFunData(ctx.id().ID().getText()); //id para el data
+    this.izquierda.add(id_fun);
+	ASMAst data = visit(ctx.formals());
+	this.izquierda.add(data);
+	
     EightBitParser.LetStatementContext letStatement = ctx.funBody().letStatement();
     ASMAst dataFunction;
    
+
+/*   
    if(letStatement != null){
       ASMAst vars = visit(letStatement.assignStmtList());
        dataFunction = DFUNCTION(id, DATA(BLOCK(((ASMBlock)data).getMembers(),((ASMBlock)vars).getMembers())));
@@ -64,8 +68,9 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
     ASMAst code = visit(ctx.funBody().letStatement().closedStatement()); //despues hacer validacion
     ASMAst codeFunction = CFUNCTION(id, DATA(CBLOCK(((ASMCBlock)code).getMembers())));
     this.derecha.add(codeFunction);
+	*/
 
-    return dataFunction;
+    return null;
    }
 
    /*@Override
@@ -112,34 +117,28 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
                                  : visit(assignList);
    }
 
-   @Override
-   public ASMAst visitVarAssignStatement(EightBitParser.VarAssignStatementContext ctx){
-     return VAR(((ASMId)visit(ctx.id())),((ASMId)visit(ctx.expr())));
-   }
 
    @Override
    public ASMAst visitAssignStmtList(EightBitParser.AssignStmtListContext ctx){
-     return BLOCK(ctx.varAssignStatement().stream()
-                     .map(c -> visit(c))
-                     .collect(Collectors.toList()));
+     return null;
    }
 
    @Override
    public ASMAst visitFormals(EightBitParser.FormalsContext ctx){
 	   EightBitParser.IdListContext idList = ctx.idList();
-	   return (idList == null ) ? BLOCK()
+	   return (idList == null ) ? null
 	                            : visit(idList);
    }
    @Override
    public ASMAst visitIdList(EightBitParser.IdListContext ctx){
-	   return  BLOCK(ctx.id().stream()
-						     .map( c -> visit(c))
-						     .collect(Collectors.toList()));
+	   return  	ctx.id().stream()
+					     .map( c -> new ASMVar(c.ID().getText()))
+					     .collect(Collectors.toList());
 
    }
    @Override
    public ASMAst visitId(EightBitParser.IdContext ctx){
-	  return  ID(ctx.ID().getText());
+	  return ID(ctx.ID().getText());
    }
 
    @Override

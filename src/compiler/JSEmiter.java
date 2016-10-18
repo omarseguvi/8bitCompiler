@@ -4,6 +4,8 @@ import eightBit.js.*;
 import java.util.*;
 
 public interface JSEmiter{
+	
+	
    default ASMAst PROGRAM(List<ASMAst> functions){ return new ASMProgram(functions);}
    //Block -> para data
    //CBlock -> para codigo
@@ -25,9 +27,10 @@ public interface JSEmiter{
    }*/
 
    default ASMId ID(String value){return new ASMId(value);}
+   default ASMId IDFunData(String value){return new ASMId("."+value+"_data:");}
 
-   default ASMVar VAR(ASMId name, ASMId value){
-     return new ASMVar(name,value);
+   default ASMVar VAR(String name){
+     return new ASMVar(new ASMId(name));
    }
 
    default ASMNum NUM(int value){ return new ASMNum(value);}

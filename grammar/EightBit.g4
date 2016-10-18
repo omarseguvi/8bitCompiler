@@ -28,7 +28,7 @@ emptyStatement       : ';'
 ;
 letStatement       : 'let' '{'  assignStmtList? '}' closedStatement
 ;
-assignStmtList     : varAssignStatement (';' varAssignStatement)*
+assignStmtList     : assignStatement (';' assignStatement)*
 ;
 closedStatement     : assignStatement
                     | whileStatement
@@ -36,8 +36,7 @@ closedStatement     : assignStatement
 					| callStatement
 					| returnStatement
 					| blockStatement
-;
-varAssignStatement      : id '=' expr
+
 ;
 assignStatement         : id '=' expr
 ;

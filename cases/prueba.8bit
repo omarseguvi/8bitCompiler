@@ -1,6 +1,6 @@
 fun prueba(a,b)
 let{
- c = 5 + 1;
+ c =2;
  d = "hola";
  e = "caca"
 }{
