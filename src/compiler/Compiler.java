@@ -21,6 +21,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 	   return this.program;
    }
    protected List<ASMAst> statements = new ArrayList<>();
+   
    //Implementando el arbol de asm
    protected List<ASMAst> izquierda = new ArrayList<>();
    protected List<ASMAst> derecha = new ArrayList<>();
@@ -50,7 +51,8 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
     ASMAst data = visit(ctx.formals());
     EightBitParser.LetStatementContext letStatement = ctx.funBody().letStatement();
     ASMAst dataFunction;
-    if(letStatement != null){
+   
+   if(letStatement != null){
       ASMAst vars = visit(letStatement.assignStmtList());
        dataFunction = DFUNCTION(id, DATA(BLOCK(((ASMBlock)data).getMembers(),((ASMBlock)vars).getMembers())));
     }

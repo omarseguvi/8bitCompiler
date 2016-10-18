@@ -1,8 +1,10 @@
 fun prueba(a,b)
 let{
- c = 5;
+ c = 5 + 1;
  d = "hola";
  e = "caca"
 }{
- return  2 + 3;
+	return  2 + 3;
 }
+
+
