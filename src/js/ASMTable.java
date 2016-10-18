@@ -32,7 +32,9 @@ public class ASMTable implements ASMAst{
  }
 
  public String getPrimeVal(String val){
-   return simbolos.get(this.funActual).get(val);
+   String ret = simbolos.get(this.funActual).get(val);
+   if(ret==null) throw new RuntimeException("Variable "+val+" no declarada dentro de contexto");
+   return ret;
  }
  
  public String addString(String content){

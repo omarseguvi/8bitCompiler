@@ -8,8 +8,5 @@
 	.fun1_b: DB 0;
 	.fun1_String_1: DB "algo"
 			DB 0;
-.fun2_data: 
-	.fun2_a: DB 0;
-	.fun2_b: DB 0;
-	.fun2_String_2: DB "algo"
-			DB 0;
+	.fun1_c: DB 0;
+	.fun1_z: DB 0;

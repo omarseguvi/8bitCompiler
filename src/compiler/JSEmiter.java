@@ -75,6 +75,8 @@ public interface JSEmiter{
    //default List<JSAst> ARGS(JSAst... args){ return Arrays.asList(args);}
 */
    default List<ASMAst> DATA(ASMAst... args){ return Arrays.asList(args);}
+   
+
 
   final ASMAst POPA = new ASMId("POP A");
   final ASMAst POPB = new ASMId("POP B");
