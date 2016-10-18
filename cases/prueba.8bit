@@ -4,7 +4,16 @@ let{
  d = "hola";
  e = "caca"
 }{
+	e= "algo";
 	return  2 + 3;
 }
+
+fun prueba2(a,f)
+let{
+ z =2}{
+	
+	return  2 + 3;
+}
+
 
 
