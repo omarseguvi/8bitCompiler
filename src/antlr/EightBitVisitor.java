@@ -71,6 +71,12 @@ public interface EightBitVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitClosedStatement(EightBitParser.ClosedStatementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link EightBitParser#varAssignStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVarAssignStatement(EightBitParser.VarAssignStatementContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link EightBitParser#assignStatement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

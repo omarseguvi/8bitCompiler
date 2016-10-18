@@ -1,0 +1,8 @@
+fun prueba(a,b)
+let{
+ c = 5;
+ d = "hola";
+ e = "caca"
+}{
+ return  2 + 3;
+}
