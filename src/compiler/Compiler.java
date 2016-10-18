@@ -17,6 +17,8 @@ import java.util.stream.*;
 public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    protected ASMAst program;
    private int a;
+   private ASMTable simbolTable;
+   
    public ASMAst getProgram(){
 	   return this.program;
    }
@@ -26,52 +28,36 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    protected List<ASMAst> derecha = new ArrayList<>();
 
    public void genCode(){
-      //this.statements.stream()
-	                 //.forEach( t -> t.genCode());
       //Aqui se llamaria para que pinte el .init: Mov D, 232 JMP main
-      System.out.print(".init:\n\tMOV D , 232\n\tJMP main\n"); //cambiar esto despues...
+      System.out.print(".init:\n\tMOV D , 232\n\t.UNDEF:255\n\tJMP main\n"); //cambiar esto despues...
+	  this.simbolTable.genCode();
       this.izquierda.stream().forEach( t -> t.genCode());
       this.derecha.stream().forEach(t -> t.genCode());
    }
    public ASMAst compile(ParseTree tree){
       this.a = 0;
+	  this.simbolTable = new ASMTable();
       return visit(tree);
    }
    @Override
    public ASMAst visitEightProgram(EightBitParser.EightProgramContext ctx){
-     //System.out.println("llegando al program");
      ctx.eightFunction().stream()
 	                      .forEach( fun -> visit(fun) );
 	   return this.program = PROGRAM(this.statements);
    }
    @Override
-   public ASMAst visitEightFunction(EightBitParser.EightFunctionContext ctx){
-    ASMId id = (ASMId)visit(ctx.id()); //id para el data
-    ASMAst data = visit(ctx.formals());
-    EightBitParser.LetStatementContext letStatement = ctx.funBody().letStatement();
-    ASMAst dataFunction;
-    if(letStatement != null){
-      ASMAst vars = visit(letStatement.assignStmtList());
-       dataFunction = DFUNCTION(id, DATA(BLOCK(((ASMBlock)data).getMembers(),((ASMBlock)vars).getMembers())));
-    }
-    else
-      dataFunction = DFUNCTION(id,DATA(BLOCK(((ASMBlock)data).getMembers())));
-    this.izquierda.add(dataFunction);
-
-     /// Aqui seguiria lo de la derecha
-    ASMAst code = visit(ctx.funBody().letStatement().closedStatement()); //despues hacer validacion
-    ASMAst codeFunction = CFUNCTION(id, DATA(CBLOCK(((ASMCBlock)code).getMembers())));
-    this.derecha.add(codeFunction);
-
-    return dataFunction;
+   public ASMAst visitEightFunction(EightBitParser.EightFunctionContext ctx){ 
+	ASMId id= (ASMId)visit(ctx.id());
+	visit(ctx.formals());
+	visit(ctx.funBody());
+	
+    return null;
    }
+   
+   
+   
+   
 
-   /*@Override
-   public JSAst visitEmptyStatement(EightBitParser.EmptyStatementContext ctx){
-      return EMPTY();
-
-   }
-*/
    @Override
    public ASMAst visitReturnStatement(EightBitParser.ReturnStatementContext ctx){
      ASMAst expr = visit(ctx.expr());
@@ -101,44 +87,35 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 						                  .collect(Collectors.toList()));
 
    }
+   
+   
+   @Override 
+   public ASMAst visitAssignStmtList(EightBitParser.AssignStmtListContext ctx) {
+			ctx.assignStatement()
+				.stream()
+				.forEach(e->{this.simbolTable.addVar(e.id().ID().getText()); visit(e);});
+			return this.simbolTable; 
+	}
 
-   @Override
-   public ASMAst visitLetStatement(EightBitParser.LetStatementContext ctx){
-     //Tengo que traerme una lista con todos los objetos ASMVar
-     EightBitParser.AssignStmtListContext assignList = ctx.assignStmtList();
-     return (assignList == null) ? BLOCK()
-                                 : visit(assignList);
-   }
-
-   @Override
-   public ASMAst visitVarAssignStatement(EightBitParser.VarAssignStatementContext ctx){
-     return VAR(((ASMId)visit(ctx.id())),((ASMId)visit(ctx.expr())));
-   }
-
-   @Override
-   public ASMAst visitAssignStmtList(EightBitParser.AssignStmtListContext ctx){
-     return BLOCK(ctx.varAssignStatement().stream()
-                     .map(c -> visit(c))
-                     .collect(Collectors.toList()));
-   }
-
-   @Override
-   public ASMAst visitFormals(EightBitParser.FormalsContext ctx){
-	   EightBitParser.IdListContext idList = ctx.idList();
-	   return (idList == null ) ? BLOCK()
-	                            : visit(idList);
-   }
-   @Override
-   public ASMAst visitIdList(EightBitParser.IdListContext ctx){
-	   return  BLOCK(ctx.id().stream()
-						     .map( c -> visit(c))
-						     .collect(Collectors.toList()));
-
-   }
+	
    @Override
    public ASMAst visitId(EightBitParser.IdContext ctx){
-	  return  ID(ctx.ID().getText());
+	  //pregunta si el string es un id de una funcion o de una variable
+	  return ctx.getParent() instanceof EightBitParser.EightFunctionContext ?
+								ID( this.simbolTable.addFun(ctx.ID().getText())): visitVar(ctx); 
    }
+   
+   public ASMAst visitVar(EightBitParser.IdContext ctx){
+	   //pregunta si se esta declarando la variable o se esta utilizando
+	  return isVarDeclaration(ctx) ?
+		 ID(this.simbolTable.addVar(ctx.ID().getText())):ID('['+this.simbolTable.getPrimeVal(ctx.ID().getText())+']') ;
+   }
+   
+   public Boolean isVarDeclaration(EightBitParser.IdContext ctx){
+	   return ctx.getParent() instanceof EightBitParser.IdListContext ||
+				ctx.getParent().getParent() instanceof EightBitParser.AssignStmtListContext;
+   }
+   
 
    @Override
     public ASMAst visitArithOperation(EightBitParser.ArithOperationContext ctx) {
@@ -199,27 +176,23 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    }
    @Override
    public ASMAst visitArithIdSingle(EightBitParser.ArithIdSingleContext ctx){
-      return OPERATION((ASMId)PUSH,visit(ctx.id()), null);
-      //return visit(ctx.id()); // ignoring by now arguments!!
+	  visit(ctx.id());
+	  return null;//OPERATION((ASMId)PUSH,, null);
    }
    @Override
    public ASMAst visitExprNum(EightBitParser.ExprNumContext ctx){
         return  ID(ctx.NUMBER().getText());
-    //return NUM(Integer.valueOf(ctx.NUMBER().getText())); Esto lo hago por el momento
    }
 
    @Override
    public ASMAst visitExprString(EightBitParser.ExprStringContext ctx){
-     return ID(ctx.STRING().getText()); //esto para que le ponga las comillas a los string :D
+		return ID( this.simbolTable.addString(ctx.getText()) ); 
    }
-   /*
-   @Override
-   public JSAst visitExprTrue(EightBitParser.ExprTrueContext ctx){
-      return TRUE;
+   
+   
+   @Override 
+   public ASMAst visitCallStatement(EightBitParser.CallStatementContext ctx) { 
+		return visitChildren(ctx); 
    }
-   @Override
-   public JSAst visitExprFalse(EightBitParser.ExprFalseContext ctx){
-      return FALSE;
-   }
-*/
+
 }

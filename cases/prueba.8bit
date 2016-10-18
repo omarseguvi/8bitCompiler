@@ -1,8 +1,7 @@
-fun prueba(a,b)
-let{
- c = 5;
- d = "hola";
- e = "caca"
-}{
- return  2 + 3;
+fun fun1(a,b,z)
+	let {c=10}{
+	c =a+z;
+	callAdd("algo");
+	return  2 + 3;
 }
+
