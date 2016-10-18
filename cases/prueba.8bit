@@ -1,4 +1,4 @@
-fun fun1(a,b)
+fun fun1(a,b,z)
 	let {c=10}{
 	c =a+z;
 	callAdd("algo");

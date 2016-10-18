@@ -18,7 +18,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    protected ASMAst program;
    private int a;
    private ASMTable simbolTable;
-   
+
    public ASMAst getProgram(){
 	   return this.program;
    }
@@ -30,13 +30,13 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    public void genCode(){
       //Aqui se llamaria para que pinte el .init: Mov D, 232 JMP main
       System.out.print(".init:\n\tMOV D , 232\n\t.UNDEF:255\n\tJMP main\n"); //cambiar esto despues...
-	  this.simbolTable.genCode();
+	    this.simbolTable.genCode();
       this.izquierda.stream().forEach( t -> t.genCode());
       this.derecha.stream().forEach(t -> t.genCode());
    }
    public ASMAst compile(ParseTree tree){
       this.a = 0;
-	  this.simbolTable = new ASMTable();
+	    this.simbolTable = new ASMTable();
       return visit(tree);
    }
    @Override
@@ -46,17 +46,16 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 	   return this.program = PROGRAM(this.statements);
    }
    @Override
-   public ASMAst visitEightFunction(EightBitParser.EightFunctionContext ctx){ 
-	ASMId id= (ASMId)visit(ctx.id());
-	visit(ctx.formals());
-	visit(ctx.funBody());
-	
+   public ASMAst visitEightFunction(EightBitParser.EightFunctionContext ctx){
+	    ASMId id= (ASMId)visit(ctx.id());
+	     visit(ctx.formals());
+	     visit(ctx.funBody());
     return null;
    }
-   
-   
-   
-   
+
+
+
+
 
    @Override
    public ASMAst visitReturnStatement(EightBitParser.ReturnStatementContext ctx){
@@ -87,35 +86,35 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 						                  .collect(Collectors.toList()));
 
    }
-   
-   
-   @Override 
+
+
+   @Override
    public ASMAst visitAssignStmtList(EightBitParser.AssignStmtListContext ctx) {
 			ctx.assignStatement()
 				.stream()
 				.forEach(e->{this.simbolTable.addVar(e.id().ID().getText()); visit(e);});
-			return this.simbolTable; 
+			return this.simbolTable;
 	}
 
-	
+
    @Override
    public ASMAst visitId(EightBitParser.IdContext ctx){
 	  //pregunta si el string es un id de una funcion o de una variable
 	  return ctx.getParent() instanceof EightBitParser.EightFunctionContext ?
-								ID( this.simbolTable.addFun(ctx.ID().getText())): visitVar(ctx); 
+								ID( this.simbolTable.addFun(ctx.ID().getText())): visitVar(ctx);
    }
-   
+
    public ASMAst visitVar(EightBitParser.IdContext ctx){
 	   //pregunta si se esta declarando la variable o se esta utilizando
 	  return isVarDeclaration(ctx) ?
 		 ID(this.simbolTable.addVar(ctx.ID().getText())):ID('['+this.simbolTable.getPrimeVal(ctx.ID().getText())+']') ;
    }
-   
+
    public Boolean isVarDeclaration(EightBitParser.IdContext ctx){
 	   return ctx.getParent() instanceof EightBitParser.IdListContext ||
 				ctx.getParent().getParent() instanceof EightBitParser.AssignStmtListContext;
    }
-   
+
 
    @Override
     public ASMAst visitArithOperation(EightBitParser.ArithOperationContext ctx) {
@@ -186,13 +185,13 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
    @Override
    public ASMAst visitExprString(EightBitParser.ExprStringContext ctx){
-		return ID( this.simbolTable.addString(ctx.getText()) ); 
+		return ID( this.simbolTable.addString(ctx.getText()) );
    }
-   
-   
-   @Override 
-   public ASMAst visitCallStatement(EightBitParser.CallStatementContext ctx) { 
-		return visitChildren(ctx); 
+
+
+   @Override
+   public ASMAst visitCallStatement(EightBitParser.CallStatementContext ctx) {
+		return visitChildren(ctx);
    }
 
 }
