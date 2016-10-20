@@ -36,23 +36,25 @@ public class ASMTable implements ASMAst{
    if(ret==null) throw new RuntimeException("Variable "+val+" no declarada dentro de contexto");
    return ret;
  }
- 
+
  public String addString(String content){
          String convert =  "."+this.funActual+"_String_"+ (++stringCounter);
          simbolos.get(this.funActual).put( convert  ,content);
 	 return convert;
  }
- 
- 
+
+ public boolean exists(String funName){
+   return simbolos.containsKey(funName); //después hacer el RuntimeException
+ }
   public void genCode(PrintStream out){
 	 simbolos.forEach((k,v)->{out.print("\n."+k +"_data: "); genVariables(v,out);});
   }
-  
+
   public void genVariables( HashMap<String, String> values, PrintStream out){
 	  //pregunta si la variable es un string , para saber como imprimirlo en 8bit assembler .
 	  values.forEach((k,v)->out.print( ((String)k).matches(".*_String_.*") ? "\n\t"+k+ ": DB "+ v +"\n\t\t\tDB 0;"
 										:"\n\t"+v+": DB 0;"));
   }
-  
-  
+
+
 }

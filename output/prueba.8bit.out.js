@@ -3,13 +3,11 @@
 	.UNDEF:255
 	JMP main
 
-.fun1_data: 
-	.fun1_a: DB 0;
-	.fun1_b: DB 0;
-	.fun1_String_1: DB "algo"
+.main_data: 
+	.main_a: DB 0;
+	.main_b: DB 0;
+	.main_String_1: DB "Hello World!"
 			DB 0;
-	.fun1_c: DB 0;
-	.fun1_z: DB 0;
 print_string:
 	POP C
 	POP B
@@ -27,3 +25,8 @@ print_string:
 	PUSH .UNDEF
 	PUSH C
 	RET
+
+main:
+	PUSH .main_String_1;
+	CALL print_string;
+	HLT
