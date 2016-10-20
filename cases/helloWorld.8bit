@@ -1,17 +1,4 @@
-// Caso Demo
-fun helloWorld(s){ ds = s + x*y/z*w; return ds;}
+fun main(){
+	print_string("Hello World!");
 
-
-
-.prueba_data:
-  prueba_a: DB 0;
-  prueba_b: DB 0;
-
-
-prueba:
-  PUSH 5;
-  PUSH 2;
-  POP A;
-  POP B
-  ADD A, B
-  PUSH A //***Opcional
+}

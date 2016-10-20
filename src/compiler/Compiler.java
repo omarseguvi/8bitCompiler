@@ -16,7 +16,6 @@ import java.util.stream.*;
 
 public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    protected ASMAst program;
-   private int a;
    private ASMTable simbolTable;
 
    public ASMAst getProgram(){
@@ -24,39 +23,56 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    }
    protected List<ASMAst> statements = new ArrayList<>();
    //Implementando el arbol de asm
-   protected List<ASMAst> izquierda = new ArrayList<>();
-   protected List<ASMAst> derecha = new ArrayList<>();
+   protected List<ASMAst> codeArea = new ArrayList<>();
 
    public void genCode(){
       //Aqui se llamaria para que pinte el .init: Mov D, 232 JMP main
       System.out.print(".init:\n\tMOV D , 232\n\t.UNDEF:255\n\tJMP main\n"); //cambiar esto despues...
 	    this.simbolTable.genCode();
-      this.izquierda.stream().forEach( t -> t.genCode());
-      this.derecha.stream().forEach(t -> t.genCode());
+      this.codeArea.stream().forEach(t -> t.genCode());
    }
    public ASMAst compile(ParseTree tree){
-      this.a = 0;
 	    this.simbolTable = new ASMTable();
       return visit(tree);
    }
    @Override
    public ASMAst visitEightProgram(EightBitParser.EightProgramContext ctx){
-     ctx.eightFunction().stream()
+		ctx.eightFunction().stream()
 	                      .forEach( fun -> visit(fun) );
-	   return this.program = PROGRAM(this.statements);
+	   return this.program = PROGRAM(this.codeArea);
    }
    @Override
    public ASMAst visitEightFunction(EightBitParser.EightFunctionContext ctx){
 	    ASMId id = (ASMId)visit(ctx.id());
-	    visit(ctx.formals()); //Interceptar la lista de formals
-	    ASMAst b = visit(ctx.funBody());
-      //ASMAst c = visit(ctx.funBody().closedStatement().blockStatement())
-      ASMFunction function = FUNCTION(id,null,b);
-      this.derecha.add(function);
-
-    return new ASMId("caca");
+		ASMAst formals = visit(ctx.formals()); //Interceptar la lista de formals
+	    ASMAst body = visit(ctx.funBody());
+		ASMFunction function = FUNCTION(id,JoinBlock(formals,body));
+		
+		if(id.getValue().equals("main"))
+			 this.codeArea.add(PRINTS());		
+		this.codeArea.add(function);
+		return  function;
    }
 
+
+	@Override
+	public ASMAst visitFormals(EightBitParser.FormalsContext ctx){
+	   EightBitParser.IdListContext idList = ctx.idList();
+	   return (idList == null ) ? BLOCK()
+	                            : visit(idList);
+   }
+   
+   @Override
+   public ASMAst visitIdList(EightBitParser.IdListContext ctx){
+		List<ASMAst> lista=	 ctx.id().stream()
+									 .map( c -> visit(c))
+									 .collect(Collectors.toList());
+		lista.add(0,POP(ID("C"),null));
+		lista.add(PUSH(ID("C"),null));
+		return BLOCK(lista);
+   }
+   
+   
    /*
    @Override
    public JSAst visitAssignStatement(EightBitParser.AssignStatementContext ctx){
@@ -84,19 +100,19 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    @Override
    public ASMAst visitReturnStatement(EightBitParser.ReturnStatementContext ctx){
      ASMAst expr = visit(ctx.expr());
-     expr.genCode();
+     //expr.genCode();
      return expr;
    }
 
-   @Override
+  /* @Override
    public ASMAst visitAssignStmtList(EightBitParser.AssignStmtListContext ctx) {
-			/*ctx.assignStatement()
+			ctx.assignStatement()
 				.stream()
-				.forEach(e->{this.simbolTable.addVar(e.id().ID().getText()); visit(e);});*/
+				.forEach(e->{this.simbolTable.addVar(e.id().ID().getText()); visit(e);});
 			return ID("hola");
 	}
-
-
+   */
+   
    @Override
    public ASMAst visitId(EightBitParser.IdContext ctx){
 	  //pregunta si el string es un id de una funcion o de una variable
@@ -106,8 +122,9 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
    public ASMAst visitVar(EightBitParser.IdContext ctx){
 	   //pregunta si se esta declarando la variable o se esta utilizando
-	  return isVarDeclaration(ctx) ?
-		 ID(this.simbolTable.addVar(ctx.ID().getText())):ID('['+this.simbolTable.getPrimeVal(ctx.ID().getText())+']') ;
+	  return  isVarDeclaration(ctx) ? SET_PARAM('['+this.simbolTable.addVar(ctx.ID().getText()) +']')
+									 :PUSH(ID('['+this.simbolTable.getPrimeVal(ctx.ID().getText())+']'),null);
+	  
    }
 
    public Boolean isVarDeclaration(EightBitParser.IdContext ctx){
@@ -187,21 +204,16 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
    @Override
    public ASMAst visitExprString(EightBitParser.ExprStringContext ctx){
-		return ID( this.simbolTable.addString(ctx.getText()) );
+		return PUSH( ID( this.simbolTable.addString(ctx.getText())), null );
    }
 
 
    @Override
    public ASMAst visitCallStatement(EightBitParser.CallStatementContext ctx) {
-    ASMId varName = ID(ctx.ID().getText());
+    ASMId funName = ID(ctx.ID().getText());
     ASMAst var = visit(ctx.arguments().args());
-    //if(this.simbolTable.exists(((ASMId)var).getValue()))
-      this.derecha.add(PRINTS());
 
-    ASMAst operPush = OPERATION(ID("PUSH"), (ASMId)var, null, null);
-    List<ASMAst> kids = new ArrayList<>();
-    kids.add(operPush);
-    return OPERATION(ID("CALL"),(ASMId)varName,null,kids);
+    return  POP( ID("C"),DATA( var, CALL(funName,null) ) );
    }
 
 }
