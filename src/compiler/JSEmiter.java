@@ -4,27 +4,23 @@ import eightBit.js.*;
 import java.util.*;
 
 public interface JSEmiter{
-	
-	
-   default ASMAst PROGRAM(List<ASMAst> functions){ return new ASMProgram(functions);}
-   //Block -> para data
-   //CBlock -> para codigo
-   default ASMAst BLOCK(List<ASMAst> members){ return new ASMBlock(members);}
-   default ASMAst BLOCK(List<ASMAst> members, List<ASMAst> vars){
-     return new ASMBlock(members,vars);
-   }
-   default ASMAst BLOCK(){ return new ASMBlock(Arrays.asList());}
 
-   default ASMAst CBLOCK(List<ASMAst> members){
-     return new ASMCBlock(members);
-   }
-   default ASMAst CBLOCK(){
-     return new ASMCBlock(Arrays.asList());
-   }
+
+   default ASMAst PROGRAM(List<ASMAst> functions){ return new ASMProgram(functions);}
+
+   default ASMAst BLOCK(List<ASMAst> members){ return new ASMBlock(members);}
+
+   default ASMAst BLOCK(){ return new ASMBlock(Arrays.asList());}
 
    /*default JSAst EMPTY(){
 	   return new JSEmpty();
    }*/
+   default ASMPrint PRINTS(){
+     return new ASMPrint(1);
+   }
+   default ASMPrint PRINTN(){
+     return new ASMPrint(2);
+   }
 
    default ASMId ID(String value){return new ASMId(value);}
    default ASMId IDFunData(String value){return new ASMId("."+value+"_data:");}
@@ -33,19 +29,9 @@ public interface JSEmiter{
      return new ASMVar(new ASMId(name));
    }
 
-   default ASMDFunction DFUNCTION(ASMId id, List<ASMAst> data){
-     return new ASMDFunction(id,data);
-   }
-   default ASMDFunction DFUNCTION(ASMId id){
-     return new ASMDFunction(id);
-   }
-
-   default ASMCFunction CFUNCTION(ASMId id, List<ASMAst> code){
-     return new ASMCFunction(id,code);
-   }
-   default ASMCFunction CFUNCTION(ASMId id){
-     return new ASMCFunction(id);
-   }
+	 default ASMFunction FUNCTION(ASMId id, ASMAst formals, ASMAst body){
+		 return new ASMFunction(id,formals,body);
+	 }
 
 /*
    default JSIf IF(JSAst c, JSAst t, JSAst e){
@@ -55,8 +41,8 @@ public interface JSEmiter{
    default JSCall CALL(JSAst f, List<JSAst> args){
        return new JSCall(f, args);
    }*/
-   default ASMOperation OPERATION(ASMId oper, ASMAst left, ASMAst right){
-     return new ASMOperation(oper, left, right);
+   default ASMOperation OPERATION(ASMId oper, ASMId left, ASMId right, List<ASMAst> children){
+     return new ASMOperation(oper, left, right, children);
    }
    default ASMAst FOLD_LEFT(ASMAst left, ASMAst right){
 	   // Expected right = OPERATION(oper, null, r)
@@ -73,7 +59,7 @@ public interface JSEmiter{
    //default List<JSAst> ARGS(JSAst... args){ return Arrays.asList(args);}
 */
    default List<ASMAst> DATA(ASMAst... args){ return Arrays.asList(args);}
-   
+
 
 
   final ASMAst POPA = new ASMId("POP A");

@@ -1,6 +1,4 @@
-fun fun1(a,b)
-	let {c=10}{
-	c =a+z;
-	callAdd("algo");
-	return  2 + 3;
+fun main(a,b){
+	print_string("Hello World!");
+
 }
