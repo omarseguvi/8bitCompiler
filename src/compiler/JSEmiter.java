@@ -11,6 +11,15 @@ public interface JSEmiter{
    default ASMAst BLOCK(List<ASMAst> members){ return new ASMBlock(members);}
 
    default ASMAst BLOCK(){ return new ASMBlock(Arrays.asList());}
+   
+   //opcion de mezclar bloques
+   default ASMAst JoinBlock(ASMAst b1,ASMAst b2){ 
+			List<ASMAst> members = new ArrayList<>();
+			members.addAll(((ASMBlock) b1).getMembers());
+			members.addAll( ((ASMBlock) b2).getMembers());
+			return new ASMBlock(members); 
+   }
+   
 
    /*default JSAst EMPTY(){
 	   return new JSEmpty();
@@ -23,14 +32,10 @@ public interface JSEmiter{
    }
 
    default ASMId ID(String value){return new ASMId(value);}
-   default ASMId IDFunData(String value){return new ASMId("."+value+"_data:");}
 
-   default ASMVar VAR(String name){
-     return new ASMVar(new ASMId(name));
-   }
 
-	 default ASMFunction FUNCTION(ASMId id, ASMAst formals, ASMAst body){
-		 return new ASMFunction(id,formals,body);
+	 default ASMFunction FUNCTION(ASMId id, ASMAst body){
+		 return new ASMFunction(id,body);
 	 }
 
 /*
@@ -61,6 +66,18 @@ public interface JSEmiter{
    default List<ASMAst> DATA(ASMAst... args){ return Arrays.asList(args);}
 
 
+  
+//operaciones ASM  
+   default ASMAst CALL(ASMAst left, List<ASMAst> k){ return new ASMOperation(ID("CALL"), (ASMId)left,null,k);}
+   default ASMAst PUSH(ASMAst left, List<ASMAst> k){ return new ASMOperation(ID("PUSH"), (ASMId)left,null,k);}
+   default ASMAst POP(ASMAst left, List<ASMAst> k){ return new ASMOperation(ID("POP"), (ASMId)left,null,k);}
+   default ASMAst MOV(ASMAst left, ASMAst right, List<ASMAst> k){ return new ASMOperation(ID("MOV"), (ASMId)left,(ASMId)right,k);}
+
+   
+//funcion para el data
+	default ASMAst SET_PARAM(String param){
+		return MOV(ID(param), ID("A"), DATA(POP(ID("A"),null)) );
+	}
 
   final ASMAst POPA = new ASMId("POP A");
   final ASMAst POPB = new ASMId("POP B");

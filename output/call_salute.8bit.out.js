@@ -4,8 +4,20 @@
 	JMP main
 
 .main_data: 
-	.main_String_1: DB "Hello World!"
+	.main_String_1: DB "Hello 666!"
 			DB 0;
+.salute_data: 
+	.salute_s: DB 0;
+salute:
+	POP C;
+	POP A;
+	MOV [.salute_s],A;
+	PUSH C;
+	PUSH [.salute_s];
+	CALL print_string;
+	POP C;
+	RET
+
 print_string:
 	POP C
 	POP B
@@ -26,6 +38,6 @@ print_string:
 
 main:
 	PUSH .main_String_1;
-	CALL print_string;
+	CALL salute;
 	POP C;
 	HLT

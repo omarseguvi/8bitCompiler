@@ -21,7 +21,8 @@ public void genCode(PrintStream out){
     children.stream().forEach(t -> t.genCode());
   }
   //validar si es dos parametros o de uno...
-  out.print("\n\t"+this.operator.getValue()+" "+this.loperand.getValue()+";");
+  out.print("\n\t"+this.operator.getValue()+" "+this.loperand.getValue());
+  out.print(this.roperand==null? ";": (','+this.roperand.getValue()+";"));
 }
 
 public String getOperator(){
