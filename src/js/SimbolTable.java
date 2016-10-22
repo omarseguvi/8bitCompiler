@@ -46,6 +46,8 @@ public class SimbolTable {
  public boolean exists(String funName){
    return simbolos.containsKey(funName); //después hacer el RuntimeException
  }
+ 
+ 
   public void genCode(PrintStream out){
 	 simbolos.forEach((k,v)->{out.print("\n."+k +"_data: "); genVariables(v,out);});
   }
