@@ -56,6 +56,8 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		
 		//solo metodos que no son main tiene el prologo
 		ASMAst prolog= id.getValue().equals("main")? BLOCK():BLOCK(generateProlog(formals.getMembers()));
+		ASMAst return = id.getValue().equals("main")? BLOCK():BLOCK(generateProlog(formals.getMembers()));
+	
 		
 		
 		ASMFunction function = FUNCTION(id,JoinBlock(prolog,body));
@@ -271,8 +273,12 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		prolog.add(PUSH(ID("C")));
 		return prolog;
 	}
-	
-	
+
+//-----------------------Metodo para saber si una funcion retorna algo--------------
+
+
+
+
 	
 }
 
