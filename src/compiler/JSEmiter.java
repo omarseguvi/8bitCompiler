@@ -71,7 +71,7 @@ public interface JSEmiter{
 	default ASMAst POP (ASMAst left) { return new ASMOperation(ID("POP"),   (ASMId)left,null);}
 	default ASMAst MOV (ASMAst left, ASMAst right){ return new ASMOperation(ID("MOV"), (ASMId)left,(ASMId)right);}
 	default ASMAst CMP(ASMAst left, ASMAst right) { return new ASMOperation(ID("CMP"), (ASMId)left,(ASMId)right);}
-	default ASMAst JMP (ASMId left)  {return new ASMOperation(left, null, null) ;};
+	default ASMAst JMP (ASMId left)  {return new ASMOperation(ID("JMP") , left, null) ;};
 
 	//   
 ////funcion para el data

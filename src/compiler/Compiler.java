@@ -36,14 +36,14 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
    @Override
    public ASMAst visitEightProgram(EightBitParser.EightProgramContext ctx){
-	   	codeArea.add(ID("\n.init:"));
+	   	codeArea.add( ID("\n.init:"));
 		codeArea.add( MOV(ID("D"), ID("232")) );
-		codeArea.add( ID("\t.UNDEF: DB 255;"));
+		codeArea.add( ID("\n\t.UNDEF: DB 255;"));
 		codeArea.add( JMP( ID("main")));
 	   
 		ctx.eightFunction().stream()
 	                      .forEach( fun -> visit(fun) );
-		this.codeArea.addAll(0,genDataSegment());
+		this.codeArea.addAll(4,genDataSegment());
 	   return this.program = PROGRAM(this.codeArea);
    }
    
@@ -51,11 +51,12 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    @Override
    public ASMAst visitEightFunction(EightBitParser.EightFunctionContext ctx){
 	    ASMId id = (ASMId)visit(ctx.id());
-		visit(ctx.formals()); //Interceptar la lista de formals
+		ASMBlock formals= (ASMBlock) visit(ctx.formals()); //Interceptar la lista de formals
 	    ASMAst body = visit(ctx.funBody());
 		
-		//ASMAst prolog= BLOCK(generateProlog(formals.getMembers()));
-		ASMFunction function = FUNCTION(id,body);
+		
+		ASMAst prolog= BLOCK(generateProlog(formals.getMembers()));
+		ASMFunction function = FUNCTION(id,prolog);
 		
 		if(id.getValue().equals("main"))
 			 this.codeArea.add(PRINTS());		
@@ -63,24 +64,22 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		this.codeArea.add(function);
 		return  function;
    }
-//
-//
-//	@Override
-//	public ASMAst visitFormals(EightBitParser.FormalsContext ctx){
-//	   EightBitParser.IdListContext idList = ctx.idList();
-//	   return (idList == null ) ? BLOCK()
-//	                            : visit(idList);
-//   }
-//   
-//   @Override
-//   public ASMAst visitIdList(EightBitParser.IdListContext ctx){
-//		List<ASMAst> lista=	 ctx.id().stream()
-//									 .map( c -> visit(c))
-//									 .collect(Collectors.toList());
-//		lista.add(0,POP(ID("C"),null));
-//		lista.add(PUSH(ID("C"),null));
-//		return BLOCK(lista);
-//   }
+
+
+	@Override
+	public ASMAst visitFormals(EightBitParser.FormalsContext ctx){
+	   EightBitParser.IdListContext idList = ctx.idList();
+	   return (idList == null ) ? BLOCK()
+	                            : visit(idList);
+   }
+   
+   @Override
+   public ASMAst visitIdList(EightBitParser.IdListContext ctx){
+		List<ASMAst> lista=	 ctx.id().stream()
+									 .map( c -> visit(c))
+									 .collect(Collectors.toList());
+		return BLOCK(lista);
+   }
 //   
 //   
 //   /*
@@ -264,7 +263,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		ArrayList<ASMAst> prolog = new ArrayList<>();
 		prolog.add(POP(ID("C")));
 		prolog.add(POP(ID("A")));
-		
+		prolog.add(POP(ID("A")));
 		return prolog;
 	}
 	

@@ -18,7 +18,6 @@ public void genCode(PrintStream out){
   out.print("\n\t"+this.operator.getValue());
   out.print(this.loperand==null?";": (" "+this.loperand.getValue() +
 			(this.roperand==null? ";": ','+this.roperand.getValue()+";" )));
-  out.println();
 }
 
 public String getOperator(){
