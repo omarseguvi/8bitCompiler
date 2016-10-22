@@ -40,6 +40,7 @@ f:
 	PUSH [f_ra]     ; saves old ra in stack
 	MOV  [f_ra], C  ; stores new ra
 	MOV  [f_n], A   ; stores new n
+	
 ;
 ; Properly generated source code of f starts here
 ;{ start of f
@@ -77,13 +78,17 @@ f:
 ;
 .f_return:        ; Every return will end here. 
 	POP A         ; Assumes return value on stack's top.
+	
 	MOV C, [f_ra] ; gets ra into C
+	
 	POP B         ; restores previous ra
 	MOV [f_ra], B
 	POP B         ; restores previous n
 	MOV [f_n], B
+	
 	PUSH A        ; pushes return value
 	PUSH C        ; pushes return address
+	
 	RET
 ;} end of f
 ;

@@ -1,4 +1,4 @@
-fun salute(s){
+fun salute(){
    print_string(s);
 }
 fun main(){

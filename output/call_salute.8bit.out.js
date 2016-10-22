@@ -12,7 +12,10 @@
 salute:
 	POP C;
 	POP A;
-	POP A;
+	PUSH [.salute_s];
+	PUSH [salute_ra];
+	MOV [salute_ra],C;
+	MOV [.salute_s],A;
 	
 print_string:
 	POP C
@@ -33,7 +36,4 @@ print_string:
 	RET
 
 main:
-	POP C;
-	POP A;
-	POP A;
 	

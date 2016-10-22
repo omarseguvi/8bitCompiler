@@ -54,8 +54,8 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		ASMBlock formals= (ASMBlock) visit(ctx.formals()); //Interceptar la lista de formals
 	    ASMAst body = visit(ctx.funBody());
 		
-		
-		ASMAst prolog= BLOCK(generateProlog(formals.getMembers()));
+		//solo metodos que no son main tiene el prologo
+		ASMAst prolog= id.getValue().equals("main")? BLOCK():BLOCK(generateProlog(formals.getMembers()));
 		ASMFunction function = FUNCTION(id,prolog);
 		
 		if(id.getValue().equals("main"))
@@ -92,21 +92,21 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 //   }
 //   */
 //
-//   @Override
-//   public ASMAst visitBlockStatement(EightBitParser.BlockStatementContext ctx){
-//      EightBitParser.ClosedListContext closedList = ctx.closedList();
-//      return (closedList == null ) ? BLOCK()
-//	                                 : visit(closedList);
-//   }
+   @Override
+   public ASMAst visitBlockStatement(EightBitParser.BlockStatementContext ctx){
+      EightBitParser.ClosedListContext closedList = ctx.closedList();
+      return (closedList == null ) ? BLOCK()
+	                                 : visit(closedList);
+   }
 //
-//   @Override
-//   public ASMAst visitClosedList(EightBitParser.ClosedListContext ctx){
-//					   return  BLOCK(ctx.closedStatement()
-//                              .stream()
-//	                            .map( c -> visit(c))
-//						         .collect(Collectors.toList()));
-//
-//   }
+   @Override
+   public ASMAst visitClosedList(EightBitParser.ClosedListContext ctx){
+					   return  BLOCK(ctx.closedStatement()
+                              .stream()
+	                            .map( c -> visit(c))
+						         .collect(Collectors.toList()));
+
+   }
 //
 //   @Override
 //   public ASMAst visitReturnStatement(EightBitParser.ReturnStatementContext ctx){
@@ -255,28 +255,21 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 //--------------------------Metodo para generar el prologo de una funcion	
 	
 	public List<ASMAst> generateProlog(List<ASMAst> params){
-		//ArrayList<String> vars = this.simbolTable.getVarFun(this.simbolTable.getFunActual())
-		//										.stream();
-		//										//.mapToint(v->");
-		
-		
+		String[] reg = {"A","B","C"}; 
 		ArrayList<ASMAst> prolog = new ArrayList<>();
+		
 		prolog.add(POP(ID("C")));
-		prolog.add(POP(ID("A")));
-		prolog.add(POP(ID("A")));
+		params.stream().forEach(e -> prolog.add( POP( ID(reg[params.indexOf(e)]) )));
+		params.stream().forEach(e-> prolog.add(PUSH(e)));
+		
+		prolog.add(PUSH(ID('['+this.simbolTable.getFunActual()+"_ra]")));
+		prolog.add(MOV( ID('['+this.simbolTable.getFunActual()+"_ra]"), ID("C")));
+		
+		params.stream().forEach(e-> prolog.add(MOV(e,ID(reg[params.indexOf(e)]))));
 		return prolog;
 	}
 	
 	
 	
 }
-
-/*
-	POP C           ; C = ra (new return adddress)
-	POP A           ; A = n  (new n value)
-	PUSH [f_n]      ; saves old n in stack
-	PUSH [f_ra]     ; saves old ra in stack
-	MOV  [f_ra], C  ; stores new ra
-	MOV  [f_n], A   ; stores new n
-;*/
 
