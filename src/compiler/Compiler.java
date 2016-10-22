@@ -48,18 +48,21 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    }
    
 
-//   @Override
-//   public ASMAst visitEightFunction(EightBitParser.EightFunctionContext ctx){
-//	    ASMId id = (ASMId)visit(ctx.id());
-//		ASMAst formals = visit(ctx.formals()); //Interceptar la lista de formals
-//	    ASMAst body = visit(ctx.funBody());
-//		ASMFunction function = FUNCTION(id,JoinBlock(formals,body));
-//		
-//		if(id.getValue().equals("main"))
-//			 this.codeArea.add(PRINTS());		
-//		this.codeArea.add(function);
-//		return  function;
-//   }
+   @Override
+   public ASMAst visitEightFunction(EightBitParser.EightFunctionContext ctx){
+	    ASMId id = (ASMId)visit(ctx.id());
+		visit(ctx.formals()); //Interceptar la lista de formals
+	    ASMAst body = visit(ctx.funBody());
+		
+		//ASMAst prolog= BLOCK(generateProlog(formals.getMembers()));
+		ASMFunction function = FUNCTION(id,body);
+		
+		if(id.getValue().equals("main"))
+			 this.codeArea.add(PRINTS());		
+		
+		this.codeArea.add(function);
+		return  function;
+   }
 //
 //
 //	@Override
@@ -102,7 +105,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 //					   return  BLOCK(ctx.closedStatement()
 //                              .stream()
 //	                            .map( c -> visit(c))
-//						                  .collect(Collectors.toList()));
+//						         .collect(Collectors.toList()));
 //
 //   }
 //
@@ -227,7 +230,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 //   }
 
 
-//--------------------------MEtodo para generar el data area en base a los datos del simbolTable----------------//
+//--------------------------Metodo para generar el data area en base a los datos del simbolTable----------------//
 
 	public List<ASMAst> genDataSegment(){
 		List<ASMAst> l =new ArrayList<>();
@@ -241,6 +244,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		List<ASMAst> l =new ArrayList<>();
 		l.add(ID("\n."+fun+"_data:"));
 		this.simbolTable.getVarFun(fun)
+						.stream()
 						.forEach((v)-> l.add( !v.getKey().contains("_String_") ? VAR(v.getValue())
 																			:STRING(v.getKey(),v.getValue()))
 								);
@@ -248,5 +252,32 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 			l.add(VAR("."+fun+"_ret"));						
 		return l;
 	}
+
+//--------------------------Metodo para generar el prologo de una funcion	
+	
+	public List<ASMAst> generateProlog(List<ASMAst> params){
+		//ArrayList<String> vars = this.simbolTable.getVarFun(this.simbolTable.getFunActual())
+		//										.stream();
+		//										//.mapToint(v->");
+		
+		
+		ArrayList<ASMAst> prolog = new ArrayList<>();
+		prolog.add(POP(ID("C")));
+		prolog.add(POP(ID("A")));
+		
+		return prolog;
+	}
+	
+	
+	
 }
+
+/*
+	POP C           ; C = ra (new return adddress)
+	POP A           ; A = n  (new n value)
+	PUSH [f_n]      ; saves old n in stack
+	PUSH [f_ra]     ; saves old ra in stack
+	MOV  [f_ra], C  ; stores new ra
+	MOV  [f_n], A   ; stores new n
+;*/
 

@@ -16,6 +16,11 @@ public class SimbolTable {
  public void setFunActual(String name){
    this.funActual = name;
  }
+ 
+ 
+ public String getFunActual(){
+   return this.funActual;
+ }
 
  public String addFun(String key){
    HashMap<String,String> nuevo = new HashMap<>();

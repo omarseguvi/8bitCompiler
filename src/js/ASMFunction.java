@@ -22,6 +22,5 @@ public class ASMFunction implements ASMAst{
 	   if (this.body != null)
 	       this.body.genCode(out);
       out.print("\n\t");
-	  out.print((this.name.getValue().equals("main")?"HLT":"RET")+'\n');
    }
 }
