@@ -34,6 +34,9 @@ public interface JSEmiter{
 		 return new ASMFunction(id,body);
 	}
 	
+	default ASMAst VAR(String name){return new ASMVar(name);}
+	default ASMAst STRING(String name, String value){return new ASMString(name, value);}
+	
 
 //  /*
 //   default JSIf IF(JSAst c, JSAst t, JSAst e){

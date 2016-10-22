@@ -10,7 +10,6 @@ public class SimbolTable {
 
  public SimbolTable(){
    simbolos = new HashMap<String, HashMap<String, String>>();
-
    stringCounter=0;
  }
 
@@ -47,6 +46,13 @@ public class SimbolTable {
    return simbolos.containsKey(funName); //después hacer el RuntimeException
  }
  
+ public Set<String> getFuns(){
+	 return this.simbolos.keySet();
+ }
+ 
+  public Set<Map.Entry<String,String>> getVarFun(String fun){
+	 return this.simbolos.get(fun).entrySet();
+ }
  
   public void genCode(PrintStream out){
 	 simbolos.forEach((k,v)->{out.print("\n."+k +"_data: "); genVariables(v,out);});

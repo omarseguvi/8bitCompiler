@@ -24,28 +24,29 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    }
 
    public void genCode(){
-      //System.out.print(".init:\n\tMOV D , 232\n\t.UNDEF:255\n\tJMP main\n"); //cambiar esto despues...
-      this.codeArea.stream().forEach(t -> t.genCode());
+
+	  this.codeArea.stream().forEach(t -> t.genCode());
    }
    
    public ASMAst compile(ParseTree tree){
-	  this.simbolTable = new SimbolTable();
-	  codeArea.add(ID(".init:"));
-	  codeArea.add( MOV(ID("D"), ID("232")) );
-  	  codeArea.add( ID(".UNDEF: DB 255;"));
-	  codeArea.add( JMP( ID("main")));
-		
-	  
+	  this.simbolTable = new SimbolTable();	  
       return visit(tree);
    }
    
 
    @Override
    public ASMAst visitEightProgram(EightBitParser.EightProgramContext ctx){
+	   	codeArea.add(ID("\n.init:"));
+		codeArea.add( MOV(ID("D"), ID("232")) );
+		codeArea.add( ID("\t.UNDEF: DB 255;"));
+		codeArea.add( JMP( ID("main")));
+	   
 		ctx.eightFunction().stream()
 	                      .forEach( fun -> visit(fun) );
+		this.codeArea.addAll(0,genDataSegment());
 	   return this.program = PROGRAM(this.codeArea);
    }
+   
 
 //   @Override
 //   public ASMAst visitEightFunction(EightBitParser.EightFunctionContext ctx){
@@ -129,23 +130,17 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    }
 
 
+   public ASMAst visitVar(EightBitParser.IdContext ctx){
+	   //pregunta si se esta declarando la variable o se esta utilizando
+	  return  isVarDeclaration(ctx) ? ID('['+this.simbolTable.addVar(ctx.ID().getText()) +']')
+									 :ID('['+this.simbolTable.getPrimeVal(ctx.ID().getText())+']');
+	  
+   }
 
-
-
-
-
-
-//   public ASMAst visitVar(EightBitParser.IdContext ctx){
-//	   //pregunta si se esta declarando la variable o se esta utilizando
-//	  return  isVarDeclaration(ctx) ? SET_PARAM('['+this.simbolTable.addVar(ctx.ID().getText()) +']')
-//									 :PUSH(ID('['+this.simbolTable.getPrimeVal(ctx.ID().getText())+']'),null);
-//	  
-//   }
-//
-//   public Boolean isVarDeclaration(EightBitParser.IdContext ctx){
-//	   return ctx.getParent() instanceof EightBitParser.IdListContext ||
-//				ctx.getParent().getParent() instanceof EightBitParser.AssignStmtListContext;
-//   }
+   public Boolean isVarDeclaration(EightBitParser.IdContext ctx){
+	   return ctx.getParent() instanceof EightBitParser.IdListContext ||
+				ctx.getParent().getParent() instanceof EightBitParser.AssignStmtListContext;
+   }
 //
 //   @Override
 //    public ASMAst visitArithOperation(EightBitParser.ArithOperationContext ctx) {
@@ -217,10 +212,10 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 //        return  ID(ctx.NUMBER().getText());
 //   }
 //
-//   @Override
-//   public ASMAst visitExprString(EightBitParser.ExprStringContext ctx){
-//		return PUSH( ID( this.simbolTable.addString(ctx.getText())), null );
-//   }
+   @Override
+   public ASMAst visitExprString(EightBitParser.ExprStringContext ctx){
+		return PUSH( ID( this.simbolTable.addString(ctx.getText())));
+   }
 //
 //
 //   @Override
@@ -231,4 +226,27 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 //    return  POP( ID("C"),DATA( var, CALL(funName,null) ) );
 //   }
 
+
+//--------------------------MEtodo para generar el data area en base a los datos del simbolTable----------------//
+
+	public List<ASMAst> genDataSegment(){
+		List<ASMAst> l =new ArrayList<>();
+		this.simbolTable.getFuns()
+						.stream()
+						.forEach((k)->l.addAll(DataSegmentFunction(k)));		
+		return l;
+	}
+	
+	public List<ASMAst> DataSegmentFunction(String fun){
+		List<ASMAst> l =new ArrayList<>();
+		l.add(ID("\n."+fun+"_data:"));
+		this.simbolTable.getVarFun(fun)
+						.forEach((v)-> l.add( !v.getKey().contains("_String_") ? VAR(v.getValue())
+																			:STRING(v.getKey(),v.getValue()))
+								);
+		if(!fun.equals("main"))
+			l.add(VAR("."+fun+"_ret"));						
+		return l;
+	}
 }
+
