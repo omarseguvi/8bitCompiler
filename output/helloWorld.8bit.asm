@@ -27,5 +27,5 @@ print_string:
 main:
 	PUSH .main_String_1;
 	CALL print_string;
-	RET;
+	HLT;
 	

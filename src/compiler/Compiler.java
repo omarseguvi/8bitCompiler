@@ -56,7 +56,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
 		//solo metodos que no son main tiene el prologo
 		ASMAst prolog= id.getValue().equals("main")? BLOCK():BLOCK(generateProlog(formals.getMembers()));
-    ASMAst ret = id.getValue().equals("main")? BLOCK(DATA(RET())): BLOCK();
+    ASMAst ret = id.getValue().equals("main")? BLOCK(DATA(HLT())): BLOCK();
 
 
 

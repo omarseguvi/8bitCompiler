@@ -11,15 +11,15 @@ public interface JSEmiter{
    default ASMAst BLOCK(List<ASMAst> members){ return new ASMBlock(members);}
 
    default ASMAst BLOCK(){ return new ASMBlock(Arrays.asList());}
-   
+
    //opcion de mezclar bloques
-   default ASMAst JoinBlock(ASMAst b1,ASMAst b2){ 
+   default ASMAst JoinBlock(ASMAst b1,ASMAst b2){
 			List<ASMAst> members = new ArrayList<>();
 			members.addAll(((ASMBlock) b1).getMembers());
 			members.addAll( ((ASMBlock) b2).getMembers());
-			return new ASMBlock(members); 
+			return new ASMBlock(members);
    }
-   
+
    default ASMPrint PRINTS(){
      return new ASMPrint(1);
    }
@@ -33,10 +33,10 @@ public interface JSEmiter{
 	default ASMFunction FUNCTION(ASMId id, ASMAst body){
 		 return new ASMFunction(id,body);
 	}
-	
+
 	default ASMAst VAR(String name){return new ASMVar(name);}
 	default ASMAst STRING(String name, String value){return new ASMString(name, value);}
-	
+
 
 //  /*
 //   default JSIf IF(JSAst c, JSAst t, JSAst e){
@@ -64,8 +64,8 @@ public interface JSEmiter{
 //   //default List<JSAst> ARGS(JSAst... args){ return Arrays.asList(args);}
 //*/
    default List<ASMAst> DATA(ASMAst... args){ return Arrays.asList(args);}
- 
-//operaciones ASM  
+
+//operaciones ASM
 	default ASMAst CALL(ASMAst left){ return new ASMOperation(ID("CALL"), (ASMId)left ,null);}
 	default ASMAst PUSH(ASMAst left){ return new ASMOperation(ID("PUSH"), (ASMId)left ,null);}
 	default ASMAst POP (ASMAst left) { return new ASMOperation(ID("POP"),   (ASMId)left,null);}
@@ -73,9 +73,10 @@ public interface JSEmiter{
 	default ASMAst CMP(ASMAst left, ASMAst right) { return new ASMOperation(ID("CMP"), (ASMId)left,(ASMId)right);}
 	default ASMAst JMP (ASMId left)  {return new ASMOperation(ID("JMP") , left, null) ;};
 	default ASMAst RET ()  {return new ASMOperation(ID("RET") , null,null) ;};
-	
+  default ASMAst HLT(){return new ASMOperation(ID("HLT"),null,null);};
 
-	//   
+
+	//
 ////funcion para el data
 //	default ASMAst SET_PARAM(String param){
 //		return MOV(ID(param), ID("A"), DATA(POP(ID("A"),null)) );
