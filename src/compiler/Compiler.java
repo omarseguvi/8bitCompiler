@@ -292,12 +292,10 @@ public List<ASMAst> generateRet(List<ASMAst> params){ //post sala
   retu.add(PUSH(ID("C")));                                                  // 	PUSH C        ; pushes return address
   retu.add(RET());                                                          //	RET
 
-<<<<<<< HEAD
+
   return retu;
 }
 
 
-=======
 
->>>>>>> d202fb953b416b14dbfe51e896d8055d1d0d1437
 }
