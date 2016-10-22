@@ -38,9 +38,9 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    public ASMAst visitEightProgram(EightBitParser.EightProgramContext ctx){
 	   	codeArea.add( ID("\n.init:"));
 		codeArea.add( MOV(ID("D"), ID("232")) );
-		codeArea.add( ID("\n\t.UNDEF: DB 255;"));
 		codeArea.add( JMP( ID("main")));
-	   
+		codeArea.add( ID("\n\t.UNDEF: DB 255;"));
+		
 		ctx.eightFunction().stream()
 	                      .forEach( fun -> visit(fun) );
 		this.codeArea.addAll(4,genDataSegment());
@@ -56,8 +56,9 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		
 		//solo metodos que no son main tiene el prologo
 		ASMAst prolog= id.getValue().equals("main")? BLOCK():BLOCK(generateProlog(formals.getMembers()));
-		ASMFunction function = FUNCTION(id,prolog);
 		
+		
+		ASMFunction function = FUNCTION(id,JoinBlock(prolog,body));
 		if(id.getValue().equals("main"))
 			 this.codeArea.add(PRINTS());		
 		
@@ -91,14 +92,14 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 //		
 //   }
 //   */
-//
+
    @Override
    public ASMAst visitBlockStatement(EightBitParser.BlockStatementContext ctx){
       EightBitParser.ClosedListContext closedList = ctx.closedList();
       return (closedList == null ) ? BLOCK()
 	                                 : visit(closedList);
    }
-//
+
    @Override
    public ASMAst visitClosedList(EightBitParser.ClosedListContext ctx){
 					   return  BLOCK(ctx.closedStatement()
@@ -107,13 +108,12 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 						         .collect(Collectors.toList()));
 
    }
-//
-//   @Override
-//   public ASMAst visitReturnStatement(EightBitParser.ReturnStatementContext ctx){
-//     ASMAst expr = visit(ctx.expr());
-//     //expr.genCode();
-//     return expr;
-//   }
+
+   @Override
+   public ASMAst visitReturnStatement(EightBitParser.ReturnStatementContext ctx){
+		ASMAst expr = visit(ctx.expr());
+		return BLOCK( DATA(POP(ID("C")) ,expr, PUSH(ID("C")),RET() ));
+   }
 //
 //  /* @Override
 //   public ASMAst visitAssignStmtList(EightBitParser.AssignStmtListContext ctx) {
@@ -135,7 +135,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    public ASMAst visitVar(EightBitParser.IdContext ctx){
 	   //pregunta si se esta declarando la variable o se esta utilizando
 	  return  isVarDeclaration(ctx) ? ID('['+this.simbolTable.addVar(ctx.ID().getText()) +']')
-									 :ID('['+this.simbolTable.getPrimeVal(ctx.ID().getText())+']');
+									 :PUSH (ID('['+this.simbolTable.getPrimeVal(ctx.ID().getText())+']'));
 	  
    }
 
@@ -204,11 +204,13 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 //	   //return OPERATION((ASMId)oper, NULL, right);
 //     return new ASMId("Por el momento nada");
 //   }
-//   @Override
-//   public ASMAst visitArithIdSingle(EightBitParser.ArithIdSingleContext ctx){
-//
-//	  return visit(ctx.id());//OPERATION((ASMId)PUSH,, null);
-//   }
+   @Override
+   public ASMAst visitArithIdSingle(EightBitParser.ArithIdSingleContext ctx){
+		ASMId funName = ID(ctx.id().ID().getText());
+		return ctx.arguments()==null ? visit(ctx.id()): BLOCK( DATA(visit(ctx.arguments()), CALL(funName)));
+   }
+
+   
 //   @Override
 //   public ASMAst visitExprNum(EightBitParser.ExprNumContext ctx){
 //        return  ID(ctx.NUMBER().getText());
@@ -220,13 +222,13 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    }
 //
 //
-//   @Override
-//   public ASMAst visitCallStatement(EightBitParser.CallStatementContext ctx) {
-//    ASMId funName = ID(ctx.ID().getText());
-//    ASMAst var = visit(ctx.arguments().args());
-//
-//    return  POP( ID("C"),DATA( var, CALL(funName,null) ) );
-//   }
+   @Override
+   public ASMAst visitCallStatement(EightBitParser.CallStatementContext ctx) {
+		ASMId funName = ID(ctx.ID().getText());
+		ASMAst var = visit(ctx.arguments().args());
+
+		return  BLOCK( DATA(var, CALL(funName)) );
+   }
 
 
 //--------------------------Metodo para generar el data area en base a los datos del simbolTable----------------//
@@ -248,7 +250,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 																			:STRING(v.getKey(),v.getValue()))
 								);
 		if(!fun.equals("main"))
-			l.add(VAR("."+fun+"_ret"));						
+			l.add(VAR("."+fun+"_ra"));						
 		return l;
 	}
 
@@ -262,10 +264,11 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		params.stream().forEach(e -> prolog.add( POP( ID(reg[params.indexOf(e)]) )));
 		params.stream().forEach(e-> prolog.add(PUSH(e)));
 		
-		prolog.add(PUSH(ID('['+this.simbolTable.getFunActual()+"_ra]")));
-		prolog.add(MOV( ID('['+this.simbolTable.getFunActual()+"_ra]"), ID("C")));
+		prolog.add(PUSH(ID("[."+this.simbolTable.getFunActual()+"_ra]")));
+		prolog.add(MOV( ID("[."+this.simbolTable.getFunActual()+"_ra]"), ID("C")));
 		
 		params.stream().forEach(e-> prolog.add(MOV(e,ID(reg[params.indexOf(e)]))));
+		prolog.add(PUSH(ID("C")));
 		return prolog;
 	}
 	

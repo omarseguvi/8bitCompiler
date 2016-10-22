@@ -1,11 +1,11 @@
-.init:
-	MOV D , 232
-	.UNDEF:255
-	JMP main
 
-.main_data: 
-	.main_String_1: DB "Hello World!"
-			DB 0;
+.init:
+	MOV D,232;
+	JMP main;
+	.UNDEF: DB 255;
+.main_data:
+	.main_String_1: DB "Hello World!" 
+	DB 0;
 print_string:
 	POP C
 	POP B
@@ -27,5 +27,4 @@ print_string:
 main:
 	PUSH .main_String_1;
 	CALL print_string;
-	POP C;
-	HLT
+	
