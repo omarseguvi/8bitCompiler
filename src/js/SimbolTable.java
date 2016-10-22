@@ -2,13 +2,13 @@ package eightBit.js;
 import java.util.*;
 import java.io.*;
 
-public class ASMTable implements ASMAst{
+public class SimbolTable {
  HashMap<String, HashMap<String,String>> simbolos;
  HashMap<String, HashMap<String,String>> simbolosString;
  String funActual;
  int stringCounter;
 
- public ASMTable(){
+ public SimbolTable(){
    simbolos = new HashMap<String, HashMap<String, String>>();
 
    stringCounter=0;

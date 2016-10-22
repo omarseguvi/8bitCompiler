@@ -7,22 +7,18 @@ public class ASMOperation implements ASMAst{
   private ASMId  operator; //ver si lo cambio por un id
   private ASMId  loperand; //operador izquierdo
   private ASMId  roperand; //operador derecho
-  private List<ASMAst>  children; //Operaciones de antesala ADD A, B    push 5 Pop b, PUSH 6 pOP A
 
-public ASMOperation (ASMId operator, ASMId loperand, ASMId roperand, List<ASMAst> children){
+public ASMOperation (ASMId operator, ASMId loperand, ASMId roperand){
   this.operator = operator;
   this.loperand = loperand; //operando izquierdo
   this.roperand = roperand; //operando derecho
-  this.children = children; //anteSala
 }
 
 public void genCode(PrintStream out){
-  if(children != null){
-    children.stream().forEach(t -> t.genCode());
-  }
-  //validar si es dos parametros o de uno...
-  out.print("\n\t"+this.operator.getValue()+" "+this.loperand.getValue());
-  out.print(this.roperand==null? ";": (','+this.roperand.getValue()+";"));
+  out.print("\n\t"+this.operator.getValue());
+  out.print(this.loperand==null?";": (" "+this.loperand.getValue() +
+			(this.roperand==null? ";": ','+this.roperand.getValue()+";" )));
+  out.println();
 }
 
 public String getOperator(){
