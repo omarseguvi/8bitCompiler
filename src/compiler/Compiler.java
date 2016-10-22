@@ -56,9 +56,11 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
 		//solo metodos que no son main tiene el prologo
 		ASMAst prolog= id.getValue().equals("main")? BLOCK():BLOCK(generateProlog(formals.getMembers()));
-    ASMAst ret = id.getValue().equals("main")? BLOCK():BLOCK(generateRet(formals.getMembers()));
 
-		ASMFunction function = FUNCTION(id,JoinBlock(prolog,JoinBlock(body,ret)));
+    ASMAst ret = id.getValue().equals("main")? BLOCK(DATA(HLT())):BLOCK(generateRet(formals.getMembers()));
+
+		ASMFunction function = FUNCTION(id,JoinBlock(JoinBlock(prolog,body),ret));
+
 		if(id.getValue().equals("main"))
 			 this.codeArea.add(PRINTS());
 
@@ -290,8 +292,12 @@ public List<ASMAst> generateRet(List<ASMAst> params){ //post sala
   retu.add(PUSH(ID("C")));                                                  // 	PUSH C        ; pushes return address
   retu.add(RET());                                                          //	RET
 
+<<<<<<< HEAD
   return retu;
 }
 
 
+=======
+
+>>>>>>> d202fb953b416b14dbfe51e896d8055d1d0d1437
 }
