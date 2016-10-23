@@ -26,6 +26,9 @@ public interface JSEmiter{
    default ASMPrint PRINTN(){
      return new ASMPrint(2);
    }
+   default ASMPrint PRINTB(){
+     return new ASMPrint(3);
+   }
 
 	default ASMId ID(String value){return new ASMId(value);}
 
