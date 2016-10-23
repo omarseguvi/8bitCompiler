@@ -1,14 +1,14 @@
 fun fact(n)
   let {
-     f = 1;
+     f = 1
   }{
-     while(n > 0){
+     while(n >  0 && z>0){
 	    f = f * n;
 		n = n - 1;
 	 }
 	 return f;
   }
-}
+
 
 fun main(){
    print_string("fact(5)=");

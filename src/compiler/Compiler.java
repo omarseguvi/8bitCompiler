@@ -57,7 +57,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		//solo metodos que no son main tiene el prologo
 		ASMAst prolog= id.getValue().equals("main")? BLOCK():BLOCK(generateProlog(formals.getMembers()));
 
-    ASMAst ret = id.getValue().equals("main")? BLOCK(DATA(HLT())):BLOCK(generateRet(formals.getMembers()));
+		ASMAst ret = id.getValue().equals("main")? BLOCK(DATA(HLT())):BLOCK(generateRet(formals.getMembers()));
 
 		ASMFunction function = FUNCTION(id,JoinBlock(JoinBlock(prolog,body),ret));
 
@@ -113,8 +113,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
    @Override
    public ASMAst visitReturnStatement(EightBitParser.ReturnStatementContext ctx){
-		ASMAst expr = visit(ctx.expr());
-		return BLOCK( DATA(POP(ID("C")) ,expr, PUSH(ID("C")),RET() ));
+		return visit(ctx.expr());
    }
 //
 //  /* @Override
@@ -270,7 +269,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		prolog.add(MOV( ID("[."+this.simbolTable.getFunActual()+"_ra]"), ID("C")));
 
 		params.stream().forEach(e-> prolog.add(MOV(e,ID(reg[params.indexOf(e)]))));
-		prolog.add(PUSH(ID("C")));
+
 		return prolog;
 	}
 
@@ -278,14 +277,13 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
 
 public List<ASMAst> generateRet(List<ASMAst> params){ //post sala
-   String[] reg = {"A","B","C"};
+  String[] reg = {"A","B","C"};
   ArrayList<ASMAst> retu = new ArrayList<>();
 
   retu.add(POP(ID("A")));                                                   //pop A
-  retu.add(MOV( ID("C") ,ID('['+this.simbolTable.getFunActual()+"_ra]")));  //	MOV C, [f_ra]
+  retu.add(MOV( ID("C") ,ID("[."+this.simbolTable.getFunActual()+"_ra]")));  //	MOV C, [f_ra]
   retu.add(POP(ID("B")));                                                   // 	POP B         ; restores previous ra
-  retu.add(MOV( ID('['+this.simbolTable.getFunActual()+"_ra]"), ID("B")));  //	MOV [f_ra], B
-  retu.add(POP(ID("B")));                                                   //	POP B         ; restores previous n
+  retu.add(MOV( ID("[."+this.simbolTable.getFunActual()+"_ra]"), ID("B")));  //	MOV [f_ra], B                                                 //	POP B         ; restores previous n
   params.stream().forEach(e-> retu.add(MOV(e,ID(reg[params.indexOf(e)]))));
 //    retu.add(MOV( ID('['+this.simbolTable.getFunActual()+"_ra]"), ID("B")));  //MOV [f_n], B
   retu.add(PUSH(ID("A")));                                                  //  PUSH A        ; pushes return value
