@@ -27,12 +27,12 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
 	  this.codeArea.stream().forEach(t -> t.genCode());
    }
-   
+
    public ASMAst compile(ParseTree tree){
-	  this.simbolTable = new SimbolTable();	  
+	  this.simbolTable = new SimbolTable();
       return visit(tree);
    }
-   
+
 
    @Override
    public ASMAst visitEightProgram(EightBitParser.EightProgramContext ctx){
@@ -40,29 +40,30 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		codeArea.add( MOV(ID("D"), ID("232")) );
 		codeArea.add( JMP( ID("main")));
 		codeArea.add( ID("\n\t.UNDEF: DB 255;"));
-		
+
 		ctx.eightFunction().stream()
 	                      .forEach( fun -> visit(fun) );
 		this.codeArea.addAll(4,genDataSegment());
 	   return this.program = PROGRAM(this.codeArea);
    }
-   
+
 
    @Override
    public ASMAst visitEightFunction(EightBitParser.EightFunctionContext ctx){
 	    ASMId id = (ASMId)visit(ctx.id());
 		ASMBlock formals= (ASMBlock) visit(ctx.formals()); //Interceptar la lista de formals
 	    ASMAst body = visit(ctx.funBody());
-		
+
 		//solo metodos que no son main tiene el prologo
 		ASMAst prolog= id.getValue().equals("main")? BLOCK():BLOCK(generateProlog(formals.getMembers()));
-	
-		
-		
-		ASMFunction function = FUNCTION(id,JoinBlock(prolog,body));
+
+    ASMAst ret = id.getValue().equals("main")? BLOCK(DATA(HLT())):BLOCK(generateRet(formals.getMembers()));
+
+		ASMFunction function = FUNCTION(id,JoinBlock(JoinBlock(prolog,body),ret));
+
 		if(id.getValue().equals("main"))
-			 this.codeArea.add(PRINTS());		
-		
+			 this.codeArea.add(PRINTS());
+
 		this.codeArea.add(function);
 		return  function;
    }
@@ -74,7 +75,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 	   return (idList == null ) ? BLOCK()
 	                            : visit(idList);
    }
-   
+
    @Override
    public ASMAst visitIdList(EightBitParser.IdListContext ctx){
 		List<ASMAst> lista=	 ctx.id().stream()
@@ -82,15 +83,15 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 									 .collect(Collectors.toList());
 		return BLOCK(lista);
    }
-//   
-//   
+//
+//
 //   /*
 //   @Override
 //   public JSAst visitAssignStatement(EightBitParser.AssignStatementContext ctx){
-//	  
+//
 //
 //	  return Block( DATA(visit(ctx.expr()), POP(ID("A")), MOV( visit(ctx.id()), ID("A"))));
-//		
+//
 //   }
 //   */
 
@@ -124,7 +125,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 //			return ID("hola");
 //	}
 //   */
-//   
+//
    @Override
    public ASMAst visitId(EightBitParser.IdContext ctx){
 	  //pregunta si el string es un id de una funcion o de una variable
@@ -137,7 +138,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 	   //pregunta si se esta declarando la variable o se esta utilizando
 	  return  isVarDeclaration(ctx) ? ID('['+this.simbolTable.addVar(ctx.ID().getText()) +']')
 									 :PUSH (ID('['+this.simbolTable.getPrimeVal(ctx.ID().getText())+']'));
-	  
+
    }
 
    public Boolean isVarDeclaration(EightBitParser.IdContext ctx){
@@ -211,7 +212,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		return ctx.arguments()==null ? visit(ctx.id()): BLOCK( DATA(visit(ctx.arguments()), CALL(funName)));
    }
 
-   
+
 //   @Override
 //   public ASMAst visitExprNum(EightBitParser.ExprNumContext ctx){
 //        return  ID(ctx.NUMBER().getText());
@@ -238,10 +239,10 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		List<ASMAst> l =new ArrayList<>();
 		this.simbolTable.getFuns()
 						.stream()
-						.forEach((k)->l.addAll(DataSegmentFunction(k)));		
+						.forEach((k)->l.addAll(DataSegmentFunction(k)));
 		return l;
 	}
-	
+
 	public List<ASMAst> DataSegmentFunction(String fun){
 		List<ASMAst> l =new ArrayList<>();
 		l.add(ID("\n."+fun+"_data:"));
@@ -251,23 +252,23 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 																			:STRING(v.getKey(),v.getValue()))
 								);
 		if(!fun.equals("main"))
-			l.add(VAR("."+fun+"_ra"));						
+			l.add(VAR("."+fun+"_ra"));
 		return l;
 	}
 
-//--------------------------Metodo para generar el prologo de una funcion	
-	
+//--------------------------Metodo para generar el prologo de una funcion
+
 	public List<ASMAst> generateProlog(List<ASMAst> params){
-		String[] reg = {"A","B","C"}; 
+		String[] reg = {"A","B","C"};
 		ArrayList<ASMAst> prolog = new ArrayList<>();
-		
+
 		prolog.add(POP(ID("C")));
 		params.stream().forEach(e -> prolog.add( POP( ID(reg[params.indexOf(e)]) )));
 		params.stream().forEach(e-> prolog.add(PUSH(e)));
-		
+
 		prolog.add(PUSH(ID("[."+this.simbolTable.getFunActual()+"_ra]")));
 		prolog.add(MOV( ID("[."+this.simbolTable.getFunActual()+"_ra]"), ID("C")));
-		
+
 		params.stream().forEach(e-> prolog.add(MOV(e,ID(reg[params.indexOf(e)]))));
 		prolog.add(PUSH(ID("C")));
 		return prolog;
@@ -276,8 +277,25 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 //-----------------------Metodo para saber si una funcion retorna algo--------------
 
 
+public List<ASMAst> generateRet(List<ASMAst> params){ //post sala
+   String[] reg = {"A","B","C"};
+  ArrayList<ASMAst> retu = new ArrayList<>();
+
+  retu.add(POP(ID("A")));                                                   //pop A
+  retu.add(MOV( ID("C") ,ID('['+this.simbolTable.getFunActual()+"_ra]")));  //	MOV C, [f_ra]
+  retu.add(POP(ID("B")));                                                   // 	POP B         ; restores previous ra
+  retu.add(MOV( ID('['+this.simbolTable.getFunActual()+"_ra]"), ID("B")));  //	MOV [f_ra], B
+  retu.add(POP(ID("B")));                                                   //	POP B         ; restores previous n
+  params.stream().forEach(e-> retu.add(MOV(e,ID(reg[params.indexOf(e)]))));
+//    retu.add(MOV( ID('['+this.simbolTable.getFunActual()+"_ra]"), ID("B")));  //MOV [f_n], B
+  retu.add(PUSH(ID("A")));                                                  //  PUSH A        ; pushes return value
+  retu.add(PUSH(ID("C")));                                                  // 	PUSH C        ; pushes return address
+  retu.add(RET());                                                          //	RET
 
 
-	
+  return retu;
 }
 
+
+
+}
