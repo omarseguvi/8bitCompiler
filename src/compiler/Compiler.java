@@ -61,8 +61,10 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
 		ASMFunction function = FUNCTION(id,JoinBlock(JoinBlock(prolog,body),ret));
 
-		if(id.getValue().equals("main"))
+		if(id.getValue().equals("main")){
 			 this.codeArea.add(PRINTS());
+			 this.codeArea.add(PRINTN());
+		}
 
 		this.codeArea.add(function);
 		return  function;
@@ -144,6 +146,34 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 	   return ctx.getParent() instanceof EightBitParser.IdListContext ||
 				ctx.getParent().getParent() instanceof EightBitParser.AssignStmtListContext;
    }
+   
+   @Override
+   public ASMAst visitArithOperation(EightBitParser.ArithOperationContext ctx) {
+	   if (ctx.oper == null)
+			return visit(ctx.arithMonom());
+		
+		ASMAst operRight = visit(ctx.arithMonom());
+		List<ASMAst> operLeft  = ctx.arithOperation().stream()
+											   .map( c -> visit(c) )
+										       .collect(Collectors.toList());
+		
+		List<ASMAst> l = new ArrayList<>();
+		l.add(operRight);
+		l.addAll(operLeft);
+		l.add(POP(ID("B")));
+		l.add(POP(ID("A")));
+		l.add(ctx.oper.getText().equals("+")?ADD(ID("A"),ID("B")): SUB(ID("A"),ID("B")));
+		l.add(PUSH(ID("A")));
+		return BLOCK(l);
+   }
+   
+   	@Override 
+	public ASMAst visitExprNum(EightBitParser.ExprNumContext ctx) {
+		System.err.println(ctx.NUMBER());
+		return PUSH(ID(ctx.NUMBER().getText()));
+	}
+
+   
 //
 //   @Override
 //    public ASMAst visitArithOperation(EightBitParser.ArithOperationContext ctx) {
@@ -208,15 +238,21 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    @Override
    public ASMAst visitArithIdSingle(EightBitParser.ArithIdSingleContext ctx){
 		ASMId funName = ID(ctx.id().ID().getText());
-		return ctx.arguments()==null ? visit(ctx.id()): BLOCK( DATA(visit(ctx.arguments()), CALL(funName)));
+		return ctx.arguments()==null ? visit(ctx.id()): 
+									ctx.arguments().args()==null? CALL(funName)
+													: BLOCK( DATA(visit(ctx.arguments().args()), CALL(funName)));
    }
 
+   	@Override 
+	public 
+	ASMAst visitArgs(EightBitParser.ArgsContext ctx){ 
+		return BLOCK(ctx.expr().stream()
+								.map( c -> visit(c) )
+								.collect(Collectors.toList())); 
+	}
 
-//   @Override
-//   public ASMAst visitExprNum(EightBitParser.ExprNumContext ctx){
-//        return  ID(ctx.NUMBER().getText());
-//   }
-//
+
+
    @Override
    public ASMAst visitExprString(EightBitParser.ExprStringContext ctx){
 		return PUSH( ID( this.simbolTable.addString(ctx.getText())));
@@ -273,7 +309,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		return prolog;
 	}
 
-//-----------------------Metodo para saber si una funcion retorna algo--------------
+//-----------------------Metodo para generar el ret final en base a identity.asm--------------
 
 
 public List<ASMAst> generateRet(List<ASMAst> params){ //post sala

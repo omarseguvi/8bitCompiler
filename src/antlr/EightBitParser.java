@@ -1233,11 +1233,14 @@ public class EightBitParser extends Parser {
 
 	public static class ArithOperationContext extends ParserRuleContext {
 		public Token oper;
-		public List<ArithMonomContext> arithMonom() {
-			return getRuleContexts(ArithMonomContext.class);
+		public ArithMonomContext arithMonom() {
+			return getRuleContext(ArithMonomContext.class,0);
 		}
-		public ArithMonomContext arithMonom(int i) {
-			return getRuleContext(ArithMonomContext.class,i);
+		public List<ArithOperationContext> arithOperation() {
+			return getRuleContexts(ArithOperationContext.class);
+		}
+		public ArithOperationContext arithOperation(int i) {
+			return getRuleContext(ArithOperationContext.class,i);
 		}
 		public ArithOperationContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1278,7 +1281,7 @@ public class EightBitParser extends Parser {
 					}
 					}
 					setState(190);
-					arithMonom();
+					arithOperation();
 					}
 					} 
 				}
@@ -1817,7 +1820,7 @@ public class EightBitParser extends Parser {
 		"\u00b3\3\2\2\2\u00b5\u00b6\3\2\2\2\u00b6\u00bb\3\2\2\2\u00b7\u00b5\3\2"+
 		"\2\2\u00b8\u00b9\7\27\2\2\u00b9\u00bb\5(\25\2\u00ba\u00af\3\2\2\2\u00ba"+
 		"\u00b8\3\2\2\2\u00bb)\3\2\2\2\u00bc\u00bd\t\2\2\2\u00bd+\3\2\2\2\u00be"+
-		"\u00c3\5.\30\2\u00bf\u00c0\t\3\2\2\u00c0\u00c2\5.\30\2\u00c1\u00bf\3\2"+
+		"\u00c3\5.\30\2\u00bf\u00c0\t\3\2\2\u00c0\u00c2\5,\27\2\u00c1\u00bf\3\2"+
 		"\2\2\u00c2\u00c5\3\2\2\2\u00c3\u00c1\3\2\2\2\u00c3\u00c4\3\2\2\2\u00c4"+
 		"-\3\2\2\2\u00c5\u00c3\3\2\2\2\u00c6\u00ca\5\60\31\2\u00c7\u00c9\5\62\32"+
 		"\2\u00c8\u00c7\3\2\2\2\u00c9\u00cc\3\2\2\2\u00ca\u00c8\3\2\2\2\u00ca\u00cb"+

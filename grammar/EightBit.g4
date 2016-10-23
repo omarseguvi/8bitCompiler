@@ -64,7 +64,7 @@ relOperation    : arithOperation ( relOperator arithOperation)*
 ;
 relOperator     :	('>' | '<' | '==' | '<=' | '>=' | '!=')
 ;
-arithOperation  : arithMonom  ((oper = ('+' | '-'))  arithMonom)*
+arithOperation  : arithMonom  ((oper = ('+' | '-'))  arithOperation)*
 ;
 arithMonom      : arithSingle operTDArithSingle*
 ;
