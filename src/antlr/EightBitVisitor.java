@@ -131,12 +131,6 @@ public interface EightBitVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitRelOperation(EightBitParser.RelOperationContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link EightBitParser#relOperator}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitRelOperator(EightBitParser.RelOperatorContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link EightBitParser#arithOperation}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

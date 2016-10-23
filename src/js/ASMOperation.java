@@ -23,4 +23,5 @@ public void genCode(PrintStream out){
 public String getOperator(){
   return this.operator.getValue();
 }
+
 }

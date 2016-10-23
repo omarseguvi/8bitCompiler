@@ -50,7 +50,7 @@ public class ASMPrint implements ASMAst{
           "\tPOP A;\n"+
       	  "\tCMP A,C;\n"+
       	  "\tJE .exit;\n"+
-          "\ttADD A, 0x30;\n"+
+          "\tADD A, 0x30;\n"+
       	  "\tMOV [D], A;\n"+
       	  "\tINC D;\n"+
       	  "\tJMP .number_to_display;\n"+
