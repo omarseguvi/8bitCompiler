@@ -1,4 +1,4 @@
-fun fact(n){
+fun fact(n)
   let {
      f = 1;
   }{
