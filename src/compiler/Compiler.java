@@ -17,6 +17,7 @@ import java.util.stream.*;
 public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    protected ASMAst program;
    private SimbolTable simbolTable;
+   private HashMap<String, String> jumps = new HashMap<>();
    protected List<ASMAst> codeArea = new ArrayList<>();
 
    public ASMAst getProgram(){
@@ -24,19 +25,19 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    }
 
    public void genCode(){
-
 	  this.codeArea.stream().forEach(t -> t.genCode());
    }
 
    public ASMAst compile(ParseTree tree){
 	  this.simbolTable = new SimbolTable();
-      return visit(tree);
+    generateJumps();
+    return visit(tree);
    }
 
 
    @Override
    public ASMAst visitEightProgram(EightBitParser.EightProgramContext ctx){
-	   	codeArea.add( ID("\n.init:"));
+	  codeArea.add( ID("\n.init:"));
 		codeArea.add( MOV(ID("D"), ID("232")) );
 		codeArea.add( JMP( ID("main")));
 		codeArea.add( ID("\n\t.UNDEF: DB 255;"));
@@ -146,17 +147,17 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 	   return ctx.getParent() instanceof EightBitParser.IdListContext ||
 				ctx.getParent().getParent() instanceof EightBitParser.AssignStmtListContext;
    }
-   
+
    @Override
    public ASMAst visitArithOperation(EightBitParser.ArithOperationContext ctx) {
 	   if (ctx.oper == null)
 			return visit(ctx.arithMonom());
-		
+
 		ASMAst operRight = visit(ctx.arithMonom());
 		List<ASMAst> operLeft  = ctx.arithOperation().stream()
 											   .map( c -> visit(c) )
 										       .collect(Collectors.toList());
-		
+
 		List<ASMAst> l = new ArrayList<>();
 		l.add(operRight);
 		l.addAll(operLeft);
@@ -166,14 +167,41 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		l.add(PUSH(ID("A")));
 		return BLOCK(l);
    }
-   
-   	@Override 
+
+   	@Override
 	public ASMAst visitExprNum(EightBitParser.ExprNumContext ctx) {
-		System.err.println(ctx.NUMBER());
 		return PUSH(ID(ctx.NUMBER().getText()));
 	}
 
-   
+  @Override
+  public ASMAst visitRelOperation(EightBitParser.RelOperationContext ctx){
+    if(ctx.relOperator == null ){
+      return visit(ctx.arithOperation(0));
+    }
+    List<ASMAst> chunk = new ArrayList<>();
+    ASMAst loper = visit(ctx.arithOperation(0)); //visita la izquierda
+    ASMAst roper = visit(ctx.arithOperation(1)); //visita la derecha
+    ASMAst relOper = ID(jumps.get(ctx.relOperator.getText())); // obtiene el operador
+    chunk.add(loper);
+    chunk.add(roper);
+    chunk.add(POP(ID("B")));
+    chunk.add(POP(ID("A")));
+    chunk.add(CMP(ID("A"),ID("B"))); //compare
+    chunk.add(CJ(relOper,ID("out"))); //Conditional Jump
+    return BLOCK(chunk);
+   }
+
+  @Override
+  public ASMAst visitWhileStatement(EightBitParser.WhileStatementContext ctx){
+		ArrayList<ASMAst> body = new ArrayList<>();
+    body.add(ID("while:"));
+    body.add(visit(ctx.expr()));
+    body.add(visit(ctx.closedStatement()));
+    body.add(JMP(ID("while")));
+    body.add(ID("out:"));
+    return BLOCK(body);
+  }
+
 //
 //   @Override
 //    public ASMAst visitArithOperation(EightBitParser.ArithOperationContext ctx) {
@@ -238,17 +266,17 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    @Override
    public ASMAst visitArithIdSingle(EightBitParser.ArithIdSingleContext ctx){
 		ASMId funName = ID(ctx.id().ID().getText());
-		return ctx.arguments()==null ? visit(ctx.id()): 
+		return ctx.arguments()==null ? visit(ctx.id()):
 									ctx.arguments().args()==null? CALL(funName)
 													: BLOCK( DATA(visit(ctx.arguments().args()), CALL(funName)));
    }
 
-   	@Override 
-	public 
-	ASMAst visitArgs(EightBitParser.ArgsContext ctx){ 
+   	@Override
+	public
+	ASMAst visitArgs(EightBitParser.ArgsContext ctx){
 		return BLOCK(ctx.expr().stream()
 								.map( c -> visit(c) )
-								.collect(Collectors.toList())); 
+								.collect(Collectors.toList()));
 	}
 
 
@@ -330,6 +358,13 @@ public List<ASMAst> generateRet(List<ASMAst> params){ //post sala
   return retu;
 }
 
-
+public void generateJumps(){
+  this.jumps.put(">","JA");
+  this.jumps.put(">=","JAE");
+  this.jumps.put("<","JB");
+  this.jumps.put("<=","JBE");
+  this.jumps.put("==","JE");
+  this.jumps.put("!=","JNE");
+}
 
 }

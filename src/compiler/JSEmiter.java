@@ -74,6 +74,7 @@ public interface JSEmiter{
 	default ASMAst JMP (ASMId left)  {return new ASMOperation(ID("JMP") , left, null) ;};
 	default ASMAst RET ()  {return new ASMOperation(ID("RET") , null,null) ;};
 	default ASMAst HLT(){return new ASMOperation(ID("HLT"),null,null);};
+  default ASMAst CJ(ASMAst oper, ASMAst left){ return new ASMOperation((ASMId)oper,(ASMId)left,null);}
 	default ASMAst ADD(ASMAst left, ASMAst right) { return new ASMOperation(ID("ADD"), (ASMId)left,(ASMId)right);}
 	default ASMAst SUB(ASMAst left, ASMAst right) { return new ASMOperation(ID("SUB"), (ASMId)left,(ASMId)right);}
 
