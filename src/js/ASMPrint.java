@@ -60,7 +60,31 @@ public class ASMPrint implements ASMAst{
            	"\tRET\n");
     }
     else{
-      out.print("\nprint_boolean:");
+      out.println("\n"+
+      "print_boolean:\n"+
+      "\tPOP C;\n"+
+      "\tPOP A;\n"+
+      "\tPUSH C;\n"+
+      ".print_bool:\n"+
+      "\tCMP A, 0;\n"+
+      "\tJZ .print_true;\n"+
+      "\tCMP A, 1;\n"+
+      "\tJZ .print_false;\n"+
+      ".print_true:\n"+
+      "\tPUSH .true\n"+
+      "\tCALL print_string\n"+
+      "\tPOP A\n"+
+      "\tJMP .print_bool_exit\n"+
+      ".print_false:\n"+
+      "\tPUSH .false\n"+
+      "\tCALL print_string\n"+
+      "\tPOP A\n"+
+      "\tJMP .print_bool_exit\n"+
+      ".print_bool_exit:\n"+
+      "\tPOP C\n"+
+      "\tPUSH .UNDEF\n"+
+      "\tPUSH C\n"+
+      "\tRET\n");
     }
   }
 

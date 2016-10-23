@@ -41,6 +41,8 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		codeArea.add( MOV(ID("D"), ID("232")) );
 		codeArea.add( JMP( ID("main")));
 		codeArea.add( ID("\n\t.UNDEF: DB 255;"));
+    codeArea.add( ID("\n\t.true: DB \"true\"\n\tDB 0;"));
+    codeArea.add( ID("\n\t.false: DB \"false\"\n\tDB 0;"));
 
 		ctx.eightFunction().stream()
 	                      .forEach( fun -> visit(fun) );
@@ -52,7 +54,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    @Override
    public ASMAst visitEightFunction(EightBitParser.EightFunctionContext ctx){
 	    ASMId id = (ASMId)visit(ctx.id());
-		ASMBlock formals= (ASMBlock) visit(ctx.formals()); //Interceptar la lista de formals
+		  ASMBlock formals= (ASMBlock) visit(ctx.formals()); //Interceptar la lista de formals
 	    ASMAst body = visit(ctx.funBody());
 
 		//solo metodos que no son main tiene el prologo
@@ -65,6 +67,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		if(id.getValue().equals("main")){
 			 this.codeArea.add(PRINTS());
 			 this.codeArea.add(PRINTN());
+       this.codeArea.add(PRINTB());
 		}
 
 		this.codeArea.add(function);
@@ -192,6 +195,20 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    }
 
   @Override
+  public ASMAst visitIfStatement(EightBitParser.IfStatementContext ctx){
+     ArrayList<ASMAst> body = new ArrayList<>();
+     body.add(ID("if:"));
+     body.add(visit(ctx.expr()));
+     body.add(visit(ctx.closedStatement(1)));
+     body.add(JMP(ID("return")));
+     body.add(ID("out:"));
+     body.add(visit(ctx.closedStatement(0)));
+     body.add(JMP(ID("return")));
+     body.add(ID("return:"));
+     return BLOCK(body);
+  }
+
+  @Override
   public ASMAst visitWhileStatement(EightBitParser.WhileStatementContext ctx){
 		ArrayList<ASMAst> body = new ArrayList<>();
     body.add(ID("while:"));
@@ -280,6 +297,15 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 	}
 
 
+  @Override
+  public ASMAst visitExprTrue(EightBitParser.ExprTrueContext ctx){
+     return PUSH(ID("1"));
+   }
+
+   @Override
+   public ASMAst visitExprFalse(EightBitParser.ExprFalseContext ctx){
+      return PUSH(ID("0"));
+    }
 
    @Override
    public ASMAst visitExprString(EightBitParser.ExprStringContext ctx){
