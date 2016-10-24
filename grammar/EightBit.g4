@@ -1,6 +1,14 @@
 /*
  loriacarlos@gmail.com EIF400 II-2016
  EightBit starting grammar
+
+ Used By: 
+ Gabriel Andrés Moreno Leiter A00125558
+ Omar Segura Villegas 116110577
+ Andrey Campos Sánchez 504070843
+ Fabian Hernandez Chavarria 402270173
+ Carlos Artavia Pineda 116390735
+
 */
 grammar EightBit;
 
@@ -9,7 +17,7 @@ eightProgram       : eightFunction+
 ;
 ////////////////////////////////////////////////////////////////////////
 // FUN
-eightFunction      : 'fun' id formals  funBody 
+eightFunction      : 'fun' id formals  funBody
 ;
 
 formals            : '(' idList? ')'

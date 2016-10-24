@@ -1,3 +1,11 @@
+/*
+Gabriel Andrés Moreno Leiter A00125558
+Omar Segura Villegas 116110577
+Andrey Campos Sánchez 504070843
+Fabian Hernandez Chavarria 402270173
+Carlos Artavia Pineda 116390735
+*/
+
 package eightBit.js;
 import java.io.*;
 
@@ -5,7 +13,7 @@ public class ASMPrint implements ASMAst{
   private int type; //1-> string, 2-> number, 3 -> boolean
 
   public ASMPrint(int tipo){ //1-> string, 2-> number, 3 -> boolean
-    this.type = tipo;	
+    this.type = tipo;
   }
 
 

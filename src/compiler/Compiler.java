@@ -1,6 +1,15 @@
 /*
  loriacarlos@gmail.com EIF400 II-2016
  EightBit starting compiler
+
+Used By:
+
+ Gabriel Andrés Moreno Leiter A00125558
+ Omar Segura Villegas 116110577
+ Andrey Campos Sánchez 504070843
+ Fabian Hernandez Chavarria 402270173
+ Carlos Artavia Pineda 116390735
+
 */
 package eightBit.compile;
 

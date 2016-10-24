@@ -1,3 +1,11 @@
+/*
+Gabriel Andrés Moreno Leiter A00125558
+Omar Segura Villegas 116110577
+Andrey Campos Sánchez 504070843
+Fabian Hernandez Chavarria 402270173
+Carlos Artavia Pineda 116390735
+*/
+
 package eightBit.js;
 import java.util.*;
 import java.io.*;
@@ -16,8 +24,8 @@ public class SimbolTable {
  public void setFunActual(String name){
    this.funActual = name;
  }
- 
- 
+
+
  public String getFunActual(){
    return this.funActual;
  }
@@ -50,15 +58,15 @@ public class SimbolTable {
  public boolean exists(String funName){
    return simbolos.containsKey(funName); //después hacer el RuntimeException
  }
- 
+
  public Set<String> getFuns(){
 	 return this.simbolos.keySet();
  }
- 
+
   public Set<Map.Entry<String,String>> getVarFun(String fun){
 	 return this.simbolos.get(fun).entrySet();
  }
- 
+
   public void genCode(PrintStream out){
 	 simbolos.forEach((k,v)->{out.print("\n."+k +"_data: "); genVariables(v,out);});
   }
