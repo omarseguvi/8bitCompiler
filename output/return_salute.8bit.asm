@@ -4,12 +4,27 @@
 	JMP main;
 	.UNDEF: DB 255;
 .main_data:
-	.main_String_1: DB "Hello World!" 
+.salute_data:
+	.salute_String_1: DB "Hello 666!" 
 	DB 0;
+	.salute_ra: DB 0;
 	.true: DB "true" 
 	DB 0;
 	.false: DB "false" 
 	DB 0;
+salute:
+	POP C;
+	PUSH [.salute_ra];
+	MOV [.salute_ra],C;
+	PUSH .salute_String_1;
+	POP A;
+	MOV C,[.salute_ra];
+	POP B;
+	MOV [.salute_ra],B;
+	PUSH A;
+	PUSH C;
+	RET;
+	
 print_string:
 	POP C
 	POP B
@@ -75,7 +90,7 @@ print_boolean:
 
 
 main:
-	PUSH .main_String_1;
+	CALL salute;
 	CALL print_string;
 	HLT;
 	

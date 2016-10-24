@@ -3,13 +3,43 @@
 	MOV D,232;
 	JMP main;
 	.UNDEF: DB 255;
+.add_data:
+	.add_x: DB 0;
+	.add_y: DB 0;
+	.add_ra: DB 0;
 .main_data:
-	.main_String_1: DB "Hello World!" 
+	.main_String_1: DB "10+56=" 
 	DB 0;
 	.true: DB "true" 
 	DB 0;
 	.false: DB "false" 
 	DB 0;
+add:
+	POP C;
+	POP A;
+	POP B;
+	PUSH [.add_y];
+	PUSH [.add_x];
+	PUSH [.add_ra];
+	MOV [.add_ra],C;
+	MOV [.add_y],A;
+	MOV [.add_x],B;
+	PUSH [.add_x];
+	PUSH [.add_y];
+	POP B;
+	POP A;
+	ADD A,B;
+	PUSH A;
+	POP A;
+	MOV C,[.add_ra];
+	POP B;
+	MOV [.add_ra],B;
+	MOV [.add_x],A;
+	MOV [.add_y],B;
+	PUSH A;
+	PUSH C;
+	RET;
+	
 print_string:
 	POP C
 	POP B
@@ -77,5 +107,9 @@ print_boolean:
 main:
 	PUSH .main_String_1;
 	CALL print_string;
+	PUSH 10;
+	PUSH 56;
+	CALL add;
+	CALL print_number;
 	HLT;
 	
