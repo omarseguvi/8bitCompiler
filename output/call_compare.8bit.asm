@@ -45,7 +45,9 @@ end_compare:
 	MOV C,[.compare_ra];
 	POP B;
 	MOV [.compare_ra],B;
+	POP B;
 	MOV [.compare_x],A;
+	POP B;
 	MOV [.compare_y],B;
 	PUSH A;
 	PUSH C;

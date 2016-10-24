@@ -50,10 +50,13 @@ while:
 	JMP while;
 out:
 	PUSH [.fact_f];
+	JMP end_fact;
+end_fact:
 	POP A;
 	MOV C,[.fact_ra];
 	POP B;
 	MOV [.fact_ra],B;
+	POP B;
 	MOV [.fact_n],A;
 	PUSH A;
 	PUSH C;
@@ -102,26 +105,6 @@ print_number:
 	PUSH .UNDEF
 	PUSH C
 	RET
-
-print_boolean:
-	POP C;
-	POP A;
-	PUSH C;
-	CMP A, 0;
-	JNE .print_false;
-	PUSH .true
-	JMP .pb_exit:
-.print_false:
-	PUSH .false
-	JMP .pb_exit:
-	.pb_exit:
-	CALL print_string;
-	POP C;
-	POP C;
-	PUSH .UNDEF
-	PUSH C
-	RET
-
 
 main:
 	PUSH .main_String_1;

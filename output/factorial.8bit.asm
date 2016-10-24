@@ -50,6 +50,7 @@ end_fact:
 	MOV C,[.fact_ra];
 	POP B;
 	MOV [.fact_ra],B;
+	POP B;
 	MOV [.fact_n],A;
 	PUSH A;
 	PUSH C;
