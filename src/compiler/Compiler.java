@@ -385,8 +385,8 @@ public void generateJumps(){
   this.jumps.put(">=","JB");
   this.jumps.put("<","JAE");
   this.jumps.put("<=","JA");
-  this.jumps.put("==","JNE");
-  this.jumps.put("!=","JE");
+  this.jumps.put("==","JE");
+  this.jumps.put("!=","JNE");
 }
 
 }
