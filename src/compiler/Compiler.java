@@ -41,13 +41,13 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		codeArea.add( MOV(ID("D"), ID("232")) );
 		codeArea.add( JMP( ID("main")));
 		codeArea.add( ID("\n\t.UNDEF: DB 255;"));
-    	codeArea.add( STRING(".true","\"true\""));
-    	codeArea.add( STRING(".false","\"false\""));
-		
+    codeArea.add( STRING(".true","\"true\""));
+    codeArea.add( STRING(".false","\"false\""));
+
 		ctx.eightFunction().stream()
-	                      .forEach( fun -> visit(fun) );
+	                     .forEach( fun -> visit(fun) );
 		this.codeArea.addAll(4,genDataSegment());
-	   return this.program = PROGRAM(this.codeArea);
+	  return this.program = PROGRAM(this.codeArea);
    }
 
 
@@ -84,25 +84,24 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
    @Override
    public ASMAst visitIdList(EightBitParser.IdListContext ctx){
-		List<ASMAst> lista=	 ctx.id().stream()
-									 .map( c -> visit(c))
-									 .collect(Collectors.toList());
-		return BLOCK(lista);
+     return BLOCK(ctx.id().stream()
+                          .map( c -> visit(c))
+                          .collect(Collectors.toList()));
    }
-   	
-	@Override 
-	public ASMAst visitLetStatement(EightBitParser.LetStatementContext ctx) { 
+
+	@Override
+	public ASMAst visitLetStatement(EightBitParser.LetStatementContext ctx) {
 		List<ASMAst> l =new ArrayList<>();
 		l.add(visit(ctx.assignStmtList()));
 		l.add(visit(ctx.closedStatement()));
 		return BLOCK(l);
 	}
 
-	   
+
  @Override
  public ASMAst visitAssignStatement(EightBitParser.AssignStatementContext ctx){
 	ASMId varName= (ASMId)visit(ctx.id());
-	
+
 	List<ASMAst> l = new ArrayList<>();
 	l.add(visit(ctx.expr()));
 	l.add(POP(ID("A")));
@@ -110,7 +109,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 	return BLOCK(l);
  }
 
-	
+
    @Override
    public ASMAst visitBlockStatement(EightBitParser.BlockStatementContext ctx){
       EightBitParser.ClosedListContext closedList = ctx.closedList();
@@ -123,7 +122,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 					   return  BLOCK(ctx.closedStatement()
                               .stream()
 	                            .map( c -> visit(c))
-						         .collect(Collectors.toList()));
+						                  .collect(Collectors.toList()));
 
    }
 
@@ -151,9 +150,9 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 	   return ctx.getParent() instanceof EightBitParser.IdListContext ||
 				ctx.getParent().getParent() instanceof EightBitParser.AssignStmtListContext;
    }
-   
+
    public Boolean isVarAssigment(EightBitParser.IdContext ctx){
-	   return ctx.getParent() instanceof EightBitParser.AssignStatementContext 
+	   return ctx.getParent() instanceof EightBitParser.AssignStatementContext
 				&& !(ctx.getParent().getParent() instanceof EightBitParser.AssignStmtListContext);
    }
 
@@ -161,7 +160,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    public ASMAst visitArithOperation(EightBitParser.ArithOperationContext ctx) {
 	    if (ctx.operArithOperation().size() == 0)
 			return visit(ctx.arithMonom());
-		
+
 		ASMAst operLeft = visit(ctx.arithMonom());
 		ASMAst operRight = visit(ctx.operArithOperation().get(0).arithMonom());
 		String operator = ctx.operArithOperation().get(0).oper.getText();
@@ -174,33 +173,33 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		l.add(operator.equals("+")?ADD(ID("A"),ID("B")): SUB(ID("A"),ID("B")));
 		l.add(PUSH(ID("A")));
 		ctx.operArithOperation().stream()
-								.skip(1)
-								.forEach(c->l.add(visit(c)));	
+								            .skip(1)
+								            .forEach(c->l.add(visit(c)));
 		return BLOCK(l);
    }
-   
-   	@Override 
-	public ASMAst visitOperArithOperation(EightBitParser.OperArithOperationContext ctx) { 
+
+   	@Override
+	public ASMAst visitOperArithOperation(EightBitParser.OperArithOperationContext ctx) {
 		List<ASMAst> l = new ArrayList<>();
 		l.add(visit(ctx.arithMonom()));
 		l.add(POP(ID("B")));
 		l.add(POP(ID("A")));
 		l.add(ctx.oper.getText().equals("+")?ADD(ID("A"),ID("B")): SUB(ID("A"),ID("B")));
 		l.add(PUSH(ID("A")));
-		return BLOCK(l); 
+		return BLOCK(l);
 	}
-   
-  
+
+
    	@Override
 	public ASMAst visitExprNum(EightBitParser.ExprNumContext ctx) {
 		return PUSH(ID(ctx.NUMBER().getText()));
 	}
-	
+
 	  @Override
   public ASMAst visitArithMonom(EightBitParser.ArithMonomContext ctx){
 		if (ctx.operTDArithSingle().size() == 0)
 			return visit(ctx.arithSingle());
-		
+
 		ASMAst operLeft = visit(ctx.arithSingle());
 		ASMAst operRight = visit(ctx.operTDArithSingle().get(0).arithSingle());
 		String operator = ctx.operTDArithSingle().get(0).oper.getText();
@@ -213,13 +212,13 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		l.add(operator.equals("*")?MUL(ID("B")): DIV(ID("B")));
 		l.add(PUSH(ID("A")));
 		ctx.operTDArithSingle().stream()
-								.skip(1)
-								.forEach(c->l.add(visit(c)));	
+								           .skip(1)
+								           .forEach(c->l.add(visit(c)));
 		return BLOCK(l);
-		
+
  }
- 
- 
+
+
 	@Override
    public ASMAst visitOperTDArithSingle(EightBitParser.OperTDArithSingleContext ctx){
 		List<ASMAst> l = new ArrayList<>();
@@ -228,7 +227,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		l.add(POP(ID("A")));
 		l.add(ctx.oper.getText().equals("*")?MUL(ID("B")): DIV(ID("B")));
 		l.add(PUSH(ID("A")));
-		return BLOCK(l); 
+		return BLOCK(l);
    }
 
   @Override
@@ -254,7 +253,8 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
      ArrayList<ASMAst> body = new ArrayList<>();
      body.add(ID("if:"));
      body.add(visit(ctx.expr()));
-     body.add(visit(ctx.closedStatement(1)));
+     if(ctx.closedStatement(1)!=null)
+      body.add(visit(ctx.closedStatement(1)));
      body.add(JMP(ID("return")));
      body.add(ID("\nout:"));
      body.add(visit(ctx.closedStatement(0)));
@@ -282,12 +282,11 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 													: BLOCK( DATA(visit(ctx.arguments().args()), CALL(funName)));
    }
 
-   	@Override
-	public
-	ASMAst visitArgs(EightBitParser.ArgsContext ctx){
+  @Override
+	public ASMAst visitArgs(EightBitParser.ArgsContext ctx){
 		return BLOCK(ctx.expr().stream()
-								.map( c -> visit(c) )
-								.collect(Collectors.toList()));
+								           .map( c -> visit(c) )
+								           .collect(Collectors.toList()));
 	}
 
 
@@ -305,8 +304,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    public ASMAst visitExprString(EightBitParser.ExprStringContext ctx){
 		return PUSH( ID( this.simbolTable.addString(ctx.getText())));
    }
-//
-//
+
    @Override
    public ASMAst visitCallStatement(EightBitParser.CallStatementContext ctx) {
 		ASMId funName = ID(ctx.ID().getText());
@@ -360,23 +358,18 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
 //-----------------------Metodo para generar el ret final en base a identity.asm--------------
 
-
 public List<ASMAst> generateRet(List<ASMAst> params){ //post sala
   String[] reg = {"A","B","C"};
-  Collections.reverse(params);//controlar que los parametros vienen invertidos en la pila
+  Collections.reverse(params); //controlar que los parametros vienen invertidos en la pila
   ArrayList<ASMAst> retu = new ArrayList<>();
-
-  retu.add(POP(ID("A")));                                                   //pop A
-  retu.add(MOV( ID("C") ,ID("[."+this.simbolTable.getFunActual()+"_ra]")));  //	MOV C, [f_ra]
-  retu.add(POP(ID("B")));                                                   // 	POP B         ; restores previous ra
-  retu.add(MOV( ID("[."+this.simbolTable.getFunActual()+"_ra]"), ID("B")));  //	MOV [f_ra], B                                                 //	POP B         ; restores previous n
+  retu.add(POP(ID("A")));
+  retu.add(MOV( ID("C") ,ID("[."+this.simbolTable.getFunActual()+"_ra]")));
+  retu.add(POP(ID("B")));
+  retu.add(MOV( ID("[."+this.simbolTable.getFunActual()+"_ra]"), ID("B")));
   params.stream().forEach(e-> retu.add(MOV(e,ID(reg[params.indexOf(e)]))));
-//    retu.add(MOV( ID('['+this.simbolTable.getFunActual()+"_ra]"), ID("B")));  //MOV [f_n], B
-  retu.add(PUSH(ID("A")));                                                  //  PUSH A        ; pushes return value
-  retu.add(PUSH(ID("C")));                                                  // 	PUSH C        ; pushes return address
-  retu.add(RET());                                                          //	RET
-
-
+  retu.add(PUSH(ID("A")));
+  retu.add(PUSH(ID("C")));
+  retu.add(RET());
   return retu;
 }
 
