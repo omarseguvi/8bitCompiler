@@ -86,26 +86,6 @@ print_number:
 	PUSH C
 	RET
 
-print_boolean:
-	POP C;
-	POP A;
-	PUSH C;
-	CMP A, 0;
-	JNE .print_false;
-	PUSH .true
-	JMP .pb_exit:
-.print_false:
-	PUSH .false
-	JMP .pb_exit:
-	.pb_exit:
-	CALL print_string;
-	POP C;
-	POP C;
-	PUSH .UNDEF
-	PUSH C
-	RET
-
-
 main:
 	PUSH .main_String_1;
 	CALL print_string;

@@ -71,32 +71,6 @@ print_string:
 	PUSH C
 	RET
 
-print_number:
-	POP C
-	POP A
-	PUSH C
-.number_to_Stack:		MOV B,A;
-	DIV 10;
-	MUL 10;
-	SUB B, A;
-	PUSH B;
-	CMP A, 0;
-	JE .number_to_display;
-	DIV 10;
-	JMP .number_to_Stack;
-.number_to_display:
-	POP A;
-	CMP A,C;
-	JE .exit;
-	ADD A, 0x30;
-	MOV [D], A;
-	INC D;
-	JMP .number_to_display;
-	.exit:
-	PUSH .UNDEF
-	PUSH C
-	RET
-
 print_boolean:
 	POP C;
 	POP A;
