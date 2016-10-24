@@ -12,20 +12,20 @@
 	DB 0;
 	.main_String_1: DB "10>5=" 
 	DB 0;
-	.true: DB "true"
+	.true: DB "true" 
 	DB 0;
-	.false: DB "false"
+	.false: DB "false" 
 	DB 0;
 compare:
 	POP C;
 	POP A;
 	POP B;
-	PUSH [.compare_x];
 	PUSH [.compare_y];
+	PUSH [.compare_x];
 	PUSH [.compare_ra];
 	MOV [.compare_ra],C;
-	MOV [.compare_x],A;
-	MOV [.compare_y],B;if:
+	MOV [.compare_y],A;
+	MOV [.compare_x],B;if:
 	PUSH [.compare_x];
 	PUSH [.compare_y];
 	POP B;
@@ -33,9 +33,11 @@ compare:
 	CMP A,B;
 	JA out;
 	PUSH 0;
-	JMP return;out:
+	JMP return;
+out:
 	PUSH 1;
-	JMP return;return:
+	JMP return;
+return:
 	POP A;
 	MOV C,[.compare_ra];
 	POP B;
@@ -85,7 +87,7 @@ print_number:
 	MOV [D], A;
 	INC D;
 	JMP .number_to_display;
-.exit:
+	.exit:
 	PUSH .UNDEF
 	PUSH C
 	RET
@@ -94,23 +96,17 @@ print_boolean:
 	POP C;
 	POP A;
 	PUSH C;
-.print_bool:
 	CMP A, 0;
-	JZ .print_true;
-	CMP A, 1;
-	JZ .print_false;
-.print_true:
+	JNE .print_false;
 	PUSH .true
-	CALL .print_string
-	POP A
-	JMP .print_bool_exit
+	JMP .pb_exit:
 .print_false:
 	PUSH .false
-	CALL .print_string
-	POP A
-	JMP .print_bool_exit
-.print_bool_exit:
-	POP C
+	JMP .pb_exit:
+	.pb_exit:
+	CALL print_string;
+	POP C;
+	POP C;
 	PUSH .UNDEF
 	PUSH C
 	RET

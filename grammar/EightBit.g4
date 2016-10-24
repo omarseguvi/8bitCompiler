@@ -59,11 +59,15 @@ expr            : relMonom ('||' relMonom)*
 relMonom        : relOperation ('&&' relOperation)*
 ;
 
-relOperation    : arithOperation ( (relOperator = ('>' | '<' | '==' | '<=' | '>=' | '!=')) arithOperation)*
+relOperation    : arithOperation ((relOperator = ('>' | '<' | '==' | '<=' | '>=' | '!='))   arithOperation)*
                     | '!'  relOperation
 ;
 
-arithOperation  : arithMonom  ((oper = ('+' | '-'))  arithOperation)*
+
+arithOperation  : arithMonom  operArithOperation*
+;
+
+operArithOperation: (oper = ('+' | '-'))  arithMonom
 ;
 arithMonom      : arithSingle operTDArithSingle*
 ;

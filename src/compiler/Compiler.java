@@ -41,9 +41,9 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		codeArea.add( MOV(ID("D"), ID("232")) );
 		codeArea.add( JMP( ID("main")));
 		codeArea.add( ID("\n\t.UNDEF: DB 255;"));
-    codeArea.add( ID("\n\t.true: DB \"true\"\n\tDB 0;"));
-    codeArea.add( ID("\n\t.false: DB \"false\"\n\tDB 0;"));
-
+    	codeArea.add( STRING(".true","\"true\""));
+    	codeArea.add( STRING(".false","\"false\""));
+		
 		ctx.eightFunction().stream()
 	                      .forEach( fun -> visit(fun) );
 		this.codeArea.addAll(4,genDataSegment());
@@ -89,18 +89,28 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 									 .collect(Collectors.toList());
 		return BLOCK(lista);
    }
-//
-//
-//   /*
-//   @Override
-//   public JSAst visitAssignStatement(EightBitParser.AssignStatementContext ctx){
-//
-//
-//	  return Block( DATA(visit(ctx.expr()), POP(ID("A")), MOV( visit(ctx.id()), ID("A"))));
-//
-//   }
-//   */
+   	
+	@Override 
+	public ASMAst visitLetStatement(EightBitParser.LetStatementContext ctx) { 
+		List<ASMAst> l =new ArrayList<>();
+		l.add(visit(ctx.assignStmtList()));
+		l.add(visit(ctx.closedStatement()));
+		return BLOCK(l);
+	}
 
+	   
+ @Override
+ public ASMAst visitAssignStatement(EightBitParser.AssignStatementContext ctx){
+	ASMId varName= (ASMId)visit(ctx.id());
+	
+	List<ASMAst> l = new ArrayList<>();
+	l.add(visit(ctx.expr()));
+	l.add(POP(ID("A")));
+	l.add(MOV(varName, ID("A")) );
+	return BLOCK(l);
+ }
+
+	
    @Override
    public ASMAst visitBlockStatement(EightBitParser.BlockStatementContext ctx){
       EightBitParser.ClosedListContext closedList = ctx.closedList();
@@ -121,16 +131,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    public ASMAst visitReturnStatement(EightBitParser.ReturnStatementContext ctx){
 		return visit(ctx.expr());
    }
-//
-//  /* @Override
-//   public ASMAst visitAssignStmtList(EightBitParser.AssignStmtListContext ctx) {
-//			ctx.assignStatement()
-//				.stream()
-//				.forEach(e->{this.simbolTable.addVar(e.id().ID().getText()); visit(e);});
-//			return ID("hola");
-//	}
-//   */
-//
+
    @Override
    public ASMAst visitId(EightBitParser.IdContext ctx){
 	  //pregunta si el string es un id de una funcion o de una variable
@@ -139,10 +140,10 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    }
 
 
-   public ASMAst visitVar(EightBitParser.IdContext ctx){
-	   //pregunta si se esta declarando la variable o se esta utilizando
-	  return  isVarDeclaration(ctx) ? ID('['+this.simbolTable.addVar(ctx.ID().getText()) +']')
-									 :PUSH (ID('['+this.simbolTable.getPrimeVal(ctx.ID().getText())+']'));
+    public ASMAst visitVar(EightBitParser.IdContext ctx){
+	  return isVarAssigment(ctx) ? ID('['+this.simbolTable.getPrimeVal(ctx.ID().getText())+']')
+								: isVarDeclaration(ctx)? ID('['+this.simbolTable.addVar(ctx.ID().getText()) +']')
+											:PUSH (ID('['+this.simbolTable.getPrimeVal(ctx.ID().getText())+']'));
 
    }
 
@@ -150,31 +151,85 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 	   return ctx.getParent() instanceof EightBitParser.IdListContext ||
 				ctx.getParent().getParent() instanceof EightBitParser.AssignStmtListContext;
    }
+   
+   public Boolean isVarAssigment(EightBitParser.IdContext ctx){
+	   return ctx.getParent() instanceof EightBitParser.AssignStatementContext 
+				&& !(ctx.getParent().getParent() instanceof EightBitParser.AssignStmtListContext);
+   }
 
    @Override
    public ASMAst visitArithOperation(EightBitParser.ArithOperationContext ctx) {
-	   if (ctx.oper == null)
+	    if (ctx.operArithOperation().size() == 0)
 			return visit(ctx.arithMonom());
-
-		ASMAst operRight = visit(ctx.arithMonom());
-		List<ASMAst> operLeft  = ctx.arithOperation().stream()
-											   .map( c -> visit(c) )
-										       .collect(Collectors.toList());
+		
+		ASMAst operLeft = visit(ctx.arithMonom());
+		ASMAst operRight = visit(ctx.operArithOperation().get(0).arithMonom());
+		String operator = ctx.operArithOperation().get(0).oper.getText();
 
 		List<ASMAst> l = new ArrayList<>();
+		l.add(operLeft);
 		l.add(operRight);
-		l.addAll(operLeft);
+		l.add(POP(ID("B")));
+		l.add(POP(ID("A")));
+		l.add(operator.equals("+")?ADD(ID("A"),ID("B")): SUB(ID("A"),ID("B")));
+		l.add(PUSH(ID("A")));
+		ctx.operArithOperation().stream()
+								.skip(1)
+								.forEach(c->l.add(visit(c)));	
+		return BLOCK(l);
+   }
+   
+   	@Override 
+	public ASMAst visitOperArithOperation(EightBitParser.OperArithOperationContext ctx) { 
+		List<ASMAst> l = new ArrayList<>();
+		l.add(visit(ctx.arithMonom()));
 		l.add(POP(ID("B")));
 		l.add(POP(ID("A")));
 		l.add(ctx.oper.getText().equals("+")?ADD(ID("A"),ID("B")): SUB(ID("A"),ID("B")));
 		l.add(PUSH(ID("A")));
-		return BLOCK(l);
-   }
-
+		return BLOCK(l); 
+	}
+   
+  
    	@Override
 	public ASMAst visitExprNum(EightBitParser.ExprNumContext ctx) {
 		return PUSH(ID(ctx.NUMBER().getText()));
 	}
+	
+	  @Override
+  public ASMAst visitArithMonom(EightBitParser.ArithMonomContext ctx){
+		if (ctx.operTDArithSingle().size() == 0)
+			return visit(ctx.arithSingle());
+		
+		ASMAst operLeft = visit(ctx.arithSingle());
+		ASMAst operRight = visit(ctx.operTDArithSingle().get(0).arithSingle());
+		String operator = ctx.operTDArithSingle().get(0).oper.getText();
+
+		List<ASMAst> l = new ArrayList<>();
+		l.add(operLeft);
+		l.add(operRight);
+		l.add(POP(ID("B")));
+		l.add(POP(ID("A")));
+		l.add(operator.equals("*")?MUL(ID("B")): DIV(ID("B")));
+		l.add(PUSH(ID("A")));
+		ctx.operTDArithSingle().stream()
+								.skip(1)
+								.forEach(c->l.add(visit(c)));	
+		return BLOCK(l);
+		
+ }
+ 
+ 
+	@Override
+   public ASMAst visitOperTDArithSingle(EightBitParser.OperTDArithSingleContext ctx){
+		List<ASMAst> l = new ArrayList<>();
+		l.add(visit(ctx.arithSingle()));
+		l.add(POP(ID("B")));
+		l.add(POP(ID("A")));
+		l.add(ctx.oper.getText().equals("*")?MUL(ID("B")): DIV(ID("B")));
+		l.add(PUSH(ID("A")));
+		return BLOCK(l); 
+   }
 
   @Override
   public ASMAst visitRelOperation(EightBitParser.RelOperationContext ctx){
@@ -201,85 +256,24 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
      body.add(visit(ctx.expr()));
      body.add(visit(ctx.closedStatement(1)));
      body.add(JMP(ID("return")));
-     body.add(ID("out:"));
+     body.add(ID("\nout:"));
      body.add(visit(ctx.closedStatement(0)));
      body.add(JMP(ID("return")));
-     body.add(ID("return:"));
+     body.add(ID("\nreturn:"));
      return BLOCK(body);
   }
 
   @Override
   public ASMAst visitWhileStatement(EightBitParser.WhileStatementContext ctx){
 		ArrayList<ASMAst> body = new ArrayList<>();
-    body.add(ID("while:"));
+    body.add(ID("\nwhile:"));
     body.add(visit(ctx.expr()));
     body.add(visit(ctx.closedStatement()));
     body.add(JMP(ID("while")));
-    body.add(ID("out:"));
+    body.add(ID("\nout:"));
     return BLOCK(body);
   }
 
-//
-//   @Override
-//    public ASMAst visitArithOperation(EightBitParser.ArithOperationContext ctx) {
-//
-//     if (ctx.oper == null)
-//		    return visit(ctx.arithMonom().get(0));
-//
-//     ASMAst oper = ( ctx.oper.getType() == EightBitParser.ADD ) ? ADD : MINUS;
-//
-//     List<ASMAst> exprs = ctx.arithMonom().stream()
-//	                                        .map( c -> visit(c) )
-//										                      .collect(Collectors.toList());
-//
-//     return ID("prueba");
-//	  /* return exprs.stream()
-//	               .skip(1)
-//				         .reduce(exprs.get(0), (opers, expr) ->
-//	                              OPERATION((ASMId)oper, opers , expr));*/
-//    }
-//
-//    @Override
-//    public ASMAst visitArithMonom(EightBitParser.ArithMonomContext ctx){
-//		ASMAst left = visit(ctx.arithSingle());
-//
-//    if(ctx.operTDArithSingle() == null){
-//      return ID("Probando");
-//      /*if(this.a == 0){
-//        this.a = 1;
-//        return OPERATION((ASMId)POPA, left, null);
-//      }
-//      else{
-//        this.a = 0;
-//        return OPERATION((ASMId)POPB, left, null);
-//      }*/
-//    }
-//    else
-//      return ctx.operTDArithSingle()
-//                .stream()
-//                .map( c -> visit(c) )
-//                .reduce(left,(opers, expr)->FOLD_LEFT(opers , expr));
-///*
-//    return (ctx.operTDArithSingle() == null)
-//		       ? left
-//		       : ctx.operTDArithSingle()
-//                .stream()
-//	              .map( c -> visit(c) )
-//						    .reduce(left,(opers, expr)->FOLD_LEFT(opers , expr));*/
-//   }
-///*
-//   @Override
-//   public ASMAst visitArithSingle(EightBitParser.ArithIdSingleContext ctx){
-//     return OPERATION((ASMId)PUSH,visit(ctx.id()), null);
-//   }*/
-//   @Override
-//   public ASMAst visitOperTDArithSingle(EightBitParser.OperTDArithSingleContext ctx){
-//	   //System.err.println(" OperTDArithSingle " + ctx.getText() + ctx.oper);
-//	   ASMAst oper = ( ctx.oper.getType() == EightBitParser.MUL ) ? MUL : DIV;
-//	   ASMAst right = visit(ctx.arithSingle());
-//	   //return OPERATION((ASMId)oper, NULL, right);
-//     return new ASMId("Por el momento nada");
-//   }
    @Override
    public ASMAst visitArithIdSingle(EightBitParser.ArithIdSingleContext ctx){
 		ASMId funName = ID(ctx.id().ID().getText());
@@ -349,6 +343,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
 	public List<ASMAst> generateProlog(List<ASMAst> params){
 		String[] reg = {"A","B","C"};
+		Collections.reverse(params);//controlar que los parametros vienen invertidos en la pila
 		ArrayList<ASMAst> prolog = new ArrayList<>();
 
 		prolog.add(POP(ID("C")));
@@ -368,6 +363,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
 public List<ASMAst> generateRet(List<ASMAst> params){ //post sala
   String[] reg = {"A","B","C"};
+  Collections.reverse(params);//controlar que los parametros vienen invertidos en la pila
   ArrayList<ASMAst> retu = new ArrayList<>();
 
   retu.add(POP(ID("A")));                                                   //pop A
@@ -385,12 +381,12 @@ public List<ASMAst> generateRet(List<ASMAst> params){ //post sala
 }
 
 public void generateJumps(){
-  this.jumps.put(">","JA");
-  this.jumps.put(">=","JAE");
-  this.jumps.put("<","JB");
-  this.jumps.put("<=","JBE");
-  this.jumps.put("==","JE");
-  this.jumps.put("!=","JNE");
+  this.jumps.put(">","JBE");
+  this.jumps.put(">=","JB");
+  this.jumps.put("<","JAE");
+  this.jumps.put("<=","JA");
+  this.jumps.put("==","JNE");
+  this.jumps.put("!=","JE");
 }
 
 }

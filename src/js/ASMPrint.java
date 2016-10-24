@@ -54,7 +54,7 @@ public class ASMPrint implements ASMAst{
       	  "\tMOV [D], A;\n"+
       	  "\tINC D;\n"+
       	  "\tJMP .number_to_display;\n"+
-    ".exit:\n"+
+          "\t.exit:\n"+
           "\tPUSH .UNDEF\n"+
            	"\tPUSH C\n"+
            	"\tRET\n");
@@ -65,23 +65,17 @@ public class ASMPrint implements ASMAst{
       "\tPOP C;\n"+
       "\tPOP A;\n"+
       "\tPUSH C;\n"+
-      ".print_bool:\n"+
       "\tCMP A, 0;\n"+
-      "\tJZ .print_true;\n"+
-      "\tCMP A, 1;\n"+
-      "\tJZ .print_false;\n"+
-      ".print_true:\n"+
+      "\tJNE .print_false;\n"+
       "\tPUSH .true\n"+
-      "\tCALL print_string\n"+
-      "\tPOP A\n"+
-      "\tJMP .print_bool_exit\n"+
+      "\tJMP .pb_exit:\n"+
       ".print_false:\n"+
       "\tPUSH .false\n"+
-      "\tCALL print_string\n"+
-      "\tPOP A\n"+
-      "\tJMP .print_bool_exit\n"+
-      ".print_bool_exit:\n"+
-      "\tPOP C\n"+
+      "\tJMP .pb_exit:\n"+
+      "\t.pb_exit:\n"+
+      "\tCALL print_string;\n"+
+      "\tPOP C;\n"+
+      "\tPOP C;\n"+
       "\tPUSH .UNDEF\n"+
       "\tPUSH C\n"+
       "\tRET\n");

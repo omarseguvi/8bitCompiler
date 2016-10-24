@@ -10,27 +10,45 @@
 .main_data:
 	.main_String_1: DB "fact(5)=" 
 	DB 0;
+	.true: DB "true" 
+	DB 0;
+	.false: DB "false" 
+	DB 0;
 fact:
 	POP C;
 	POP A;
 	PUSH [.fact_n];
 	PUSH [.fact_ra];
 	MOV [.fact_ra],C;
-	MOV [.fact_n],A;while:
+	MOV [.fact_n],A;
+	PUSH 1;
+	POP A;
+	MOV [.fact_f],A;
+while:
 	PUSH [.fact_n];
 	PUSH 0;
 	POP B;
 	POP A;
 	CMP A,B;
-	JA out;
+	JBE out;
+	PUSH [.fact_f];
 	PUSH [.fact_n];
+	POP B;
+	POP A;
+	MUL B;
+	PUSH A;
+	POP A;
+	MOV [.fact_f],A;
 	PUSH [.fact_n];
 	PUSH 1;
 	POP B;
 	POP A;
 	SUB A,B;
 	PUSH A;
-	JMP while;out:
+	POP A;
+	MOV [.fact_n],A;
+	JMP while;
+out:
 	PUSH [.fact_f];
 	POP A;
 	MOV C,[.fact_ra];
@@ -80,10 +98,30 @@ print_number:
 	MOV [D], A;
 	INC D;
 	JMP .number_to_display;
-.exit:
+	.exit:
 	PUSH .UNDEF
 	PUSH C
 	RET
+
+print_boolean:
+	POP C;
+	POP A;
+	PUSH C;
+	CMP A, 0;
+	JNE .print_false;
+	PUSH .true
+	JMP .pb_exit:
+.print_false:
+	PUSH .false
+	JMP .pb_exit:
+	.pb_exit:
+	CALL print_string;
+	POP C;
+	POP C;
+	PUSH .UNDEF
+	PUSH C
+	RET
+
 
 main:
 	PUSH .main_String_1;
