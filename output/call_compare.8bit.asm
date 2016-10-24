@@ -31,7 +31,7 @@ compare:
 	POP B;
 	POP A;
 	CMP A,B;
-	JA out;
+	JBE out;
 	PUSH 0;
 	JMP return;
 out:

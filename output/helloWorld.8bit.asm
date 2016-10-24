@@ -6,6 +6,10 @@
 .main_data:
 	.main_String_1: DB "Hello World!" 
 	DB 0;
+	.true: DB "true" 
+	DB 0;
+	.false: DB "false" 
+	DB 0;
 print_string:
 	POP C
 	POP B
@@ -41,14 +45,34 @@ print_number:
 	POP A;
 	CMP A,C;
 	JE .exit;
-	tADD A, 0x30;
+	ADD A, 0x30;
 	MOV [D], A;
 	INC D;
 	JMP .number_to_display;
-.exit:
+	.exit:
 	PUSH .UNDEF
 	PUSH C
 	RET
+
+print_boolean:
+	POP C;
+	POP A;
+	PUSH C;
+	CMP A, 0;
+	JNE .print_false;
+	PUSH .true
+	JMP .pb_exit:
+.print_false:
+	PUSH .false
+	JMP .pb_exit:
+	.pb_exit:
+	CALL print_string;
+	POP C;
+	POP C;
+	PUSH .UNDEF
+	PUSH C
+	RET
+
 
 main:
 	PUSH .main_String_1;
