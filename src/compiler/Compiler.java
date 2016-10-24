@@ -18,6 +18,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    protected ASMAst program;
    private SimbolTable simbolTable;
    private HashMap<String, String> jumps = new HashMap<>();
+   private List<String> prints = new ArrayList<>();
    protected List<ASMAst> codeArea = new ArrayList<>();
 
    public ASMAst getProgram(){
@@ -65,9 +66,12 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 		ASMFunction function = FUNCTION(id,JoinBlock(JoinBlock(prolog,body),ret));
 
 		if(id.getValue().equals("main")){
-			 this.codeArea.add(PRINTS());
-			 this.codeArea.add(PRINTN());
-       this.codeArea.add(PRINTB());
+			 if(prints.contains("print_string"))
+         this.codeArea.add(PRINTS());
+       if(prints.contains("print_number"))
+          this.codeArea.add(PRINTN());
+			 if(prints.contains("print_boolean"))
+          this.codeArea.add(PRINTB());
 		}
 
 		this.codeArea.add(function);
@@ -309,7 +313,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    public ASMAst visitCallStatement(EightBitParser.CallStatementContext ctx) {
 		ASMId funName = ID(ctx.ID().getText());
 		ASMAst var = visit(ctx.arguments().args());
-
+    prints.add(funName.getValue());
 		return  BLOCK( DATA(var, CALL(funName)) );
    }
 

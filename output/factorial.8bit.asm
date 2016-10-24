@@ -3,41 +3,54 @@
 	MOV D,232;
 	JMP main;
 	.UNDEF: DB 255;
-.add_data:
-	.add_x: DB 0;
-	.add_y: DB 0;
-	.add_ra: DB 0;
+.fact_data:
+	.fact_n: DB 0;
+	.fact_ra: DB 0;
 .main_data:
-	.main_String_1: DB "10+56=" 
+	.main_String_1: DB "fact(5)=" 
 	DB 0;
 	.true: DB "true" 
 	DB 0;
 	.false: DB "false" 
 	DB 0;
-add:
+fact:
 	POP C;
 	POP A;
-	POP B;
-	PUSH [.add_y];
-	PUSH [.add_x];
-	PUSH [.add_ra];
-	MOV [.add_ra],C;
-	MOV [.add_y],A;
-	MOV [.add_x],B;
-	PUSH [.add_x];
-	PUSH [.add_y];
+	PUSH [.fact_n];
+	PUSH [.fact_ra];
+	MOV [.fact_ra],C;
+	MOV [.fact_n],A;if:
+	PUSH [.fact_n];
+	PUSH 0;
 	POP B;
 	POP A;
-	ADD A,B;
+	CMP A,B;
+	JE out;
+	JMP return;
+out:
+	PUSH 1;
+	JMP end_fact;
+	JMP return;
+return:
+	PUSH [.fact_n];
+	PUSH [.fact_n];
+	PUSH 1;
+	POP B;
+	POP A;
+	SUB A,B;
 	PUSH A;
-	JMP end_add;
-end_add:
-	POP A;
-	MOV C,[.add_ra];
+	CALL fact;
 	POP B;
-	MOV [.add_ra],B;
-	MOV [.add_x],A;
-	MOV [.add_y],B;
+	POP A;
+	MUL B;
+	PUSH A;
+	JMP end_fact;
+end_fact:
+	POP A;
+	MOV C,[.fact_ra];
+	POP B;
+	MOV [.fact_ra],B;
+	MOV [.fact_n],A;
 	PUSH A;
 	PUSH C;
 	RET;
@@ -89,9 +102,8 @@ print_number:
 main:
 	PUSH .main_String_1;
 	CALL print_string;
-	PUSH 10;
-	PUSH 56;
-	CALL add;
+	PUSH 5;
+	CALL fact;
 	CALL print_number;
 	HLT;
 	
