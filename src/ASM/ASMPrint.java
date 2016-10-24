@@ -5,7 +5,7 @@ public class ASMPrint implements ASMAst{
   private int type; //1-> string, 2-> number, 3 -> boolean
 
   public ASMPrint(int tipo){ //1-> string, 2-> number, 3 -> boolean
-    this.type = tipo;
+    this.type = tipo;	
   }
 
 
@@ -36,7 +36,7 @@ public class ASMPrint implements ASMAst{
           "\tPOP C\n"+
           "\tPOP A\n"+
           "\tPUSH C\n"+
-    ".number_to_Stack:\t"+
+    ".number_to_Stack:\n"+
           "\tMOV B,A;\n"+
       	  "\tDIV 10;\n"+
         	"\tMUL 10;\n"+

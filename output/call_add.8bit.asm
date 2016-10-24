@@ -36,7 +36,9 @@ end_add:
 	MOV C,[.add_ra];
 	POP B;
 	MOV [.add_ra],B;
+	POP B;
 	MOV [.add_x],A;
+	POP B;
 	MOV [.add_y],B;
 	PUSH A;
 	PUSH C;
@@ -64,7 +66,8 @@ print_number:
 	POP C
 	POP A
 	PUSH C
-.number_to_Stack:		MOV B,A;
+.number_to_Stack:
+	MOV B,A;
 	DIV 10;
 	MUL 10;
 	SUB B, A;

@@ -9,7 +9,7 @@ eightProgram       : eightFunction+
 ;
 ////////////////////////////////////////////////////////////////////////
 // FUN
-eightFunction      : 'fun' id formals funBody
+eightFunction      : 'fun' id formals  funBody 
 ;
 
 formals            : '(' idList? ')'

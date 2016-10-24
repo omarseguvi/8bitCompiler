@@ -1,4 +1,0 @@
-fun main(a,b){
-	print_string("Hello World!");
-
-}

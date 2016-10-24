@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.stream.*;
 
 
-public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
+public class Compiler extends EightBitBaseVisitor<ASMAst> implements ASMEmiter{
    protected ASMAst program;
    private SimbolTable simbolTable;
    private HashMap<String, String> jumps = new HashMap<>();
@@ -196,6 +196,8 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
    	@Override
 	public ASMAst visitExprNum(EightBitParser.ExprNumContext ctx) {
+		if(Integer.parseInt(ctx.NUMBER().getText()) >255)
+			    throw new RuntimeException("No numeros mayores a 255");
 		return PUSH(ID(ctx.NUMBER().getText()));
 	}
 
@@ -313,7 +315,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
    public ASMAst visitCallStatement(EightBitParser.CallStatementContext ctx) {
 		ASMId funName = ID(ctx.ID().getText());
 		ASMAst var = visit(ctx.arguments().args());
-    prints.add(funName.getValue());
+		prints.add(funName.getValue());
 		return  BLOCK( DATA(var, CALL(funName)) );
    }
 

@@ -78,7 +78,8 @@ print_number:
 	POP C
 	POP A
 	PUSH C
-.number_to_Stack:		MOV B,A;
+.number_to_Stack:
+	MOV B,A;
 	DIV 10;
 	MUL 10;
 	SUB B, A;

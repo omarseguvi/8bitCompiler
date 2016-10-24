@@ -4,7 +4,6 @@
 	JMP main;
 	.UNDEF: DB 255;
 .fact_data:
-	.fact_f: DB 0;
 	.fact_n: DB 0;
 	.fact_ra: DB 0;
 .main_data:
@@ -21,36 +20,6 @@ fact:
 	PUSH [.fact_ra];
 	MOV [.fact_ra],C;
 	MOV [.fact_n],A;
-	PUSH 1;
-	POP A;
-	MOV [.fact_f],A;
-while:
-	PUSH [.fact_n];
-	PUSH 0;
-	POP B;
-	POP A;
-	CMP A,B;
-	JBE out;
-	PUSH [.fact_f];
-	PUSH [.fact_n];
-	POP B;
-	POP A;
-	MUL B;
-	PUSH A;
-	POP A;
-	MOV [.fact_f],A;
-	PUSH [.fact_n];
-	PUSH 1;
-	POP B;
-	POP A;
-	SUB A,B;
-	PUSH A;
-	POP A;
-	MOV [.fact_n],A;
-	JMP while;
-out:
-	PUSH [.fact_f];
-	JMP end_fact;
 end_fact:
 	POP A;
 	MOV C,[.fact_ra];
@@ -84,7 +53,8 @@ print_number:
 	POP C
 	POP A
 	PUSH C
-.number_to_Stack:		MOV B,A;
+.number_to_Stack:
+	MOV B,A;
 	DIV 10;
 	MUL 10;
 	SUB B, A;
