@@ -30,6 +30,8 @@ add:
 	POP A;
 	ADD A,B;
 	PUSH A;
+	JMP end_add;
+end_add:
 	POP A;
 	MOV C,[.add_ra];
 	POP B;

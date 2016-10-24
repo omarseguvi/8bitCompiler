@@ -33,11 +33,14 @@ compare:
 	CMP A,B;
 	JBE out;
 	PUSH 0;
+	JMP end_compare;
 	JMP return;
 out:
 	PUSH 1;
+	JMP end_compare;
 	JMP return;
 return:
+end_compare:
 	POP A;
 	MOV C,[.compare_ra];
 	POP B;

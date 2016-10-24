@@ -128,7 +128,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
 
    @Override
    public ASMAst visitReturnStatement(EightBitParser.ReturnStatementContext ctx){
-		return visit(ctx.expr());
+		return BLOCK(DATA(visit(ctx.expr()), JMP(ID("end_"+this.simbolTable.getFunActual()))));
    }
 
    @Override
@@ -362,6 +362,7 @@ public List<ASMAst> generateRet(List<ASMAst> params){ //post sala
   String[] reg = {"A","B","C"};
   Collections.reverse(params); //controlar que los parametros vienen invertidos en la pila
   ArrayList<ASMAst> retu = new ArrayList<>();
+  retu.add(ID("\nend_"+this.simbolTable.getFunActual()+":"));
   retu.add(POP(ID("A")));
   retu.add(MOV( ID("C") ,ID("[."+this.simbolTable.getFunActual()+"_ra]")));
   retu.add(POP(ID("B")));
