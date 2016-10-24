@@ -19,7 +19,8 @@ fact:
 	PUSH [.fact_n];
 	PUSH [.fact_ra];
 	MOV [.fact_ra],C;
-	MOV [.fact_n],A;if:
+	MOV [.fact_n],A;
+if:
 	PUSH [.fact_n];
 	PUSH 0;
 	POP B;
@@ -78,7 +79,8 @@ print_number:
 	POP C
 	POP A
 	PUSH C
-.number_to_Stack:		MOV B,A;
+.number_to_Stack:
+	MOV B,A;
 	DIV 10;
 	MUL 10;
 	SUB B, A;

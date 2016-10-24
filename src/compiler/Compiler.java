@@ -255,7 +255,7 @@ public class Compiler extends EightBitBaseVisitor<ASMAst> implements JSEmiter{
   @Override
   public ASMAst visitIfStatement(EightBitParser.IfStatementContext ctx){
      ArrayList<ASMAst> body = new ArrayList<>();
-     body.add(ID("if:"));
+     body.add(ID("\nif:"));
      body.add(visit(ctx.expr()));
      if(ctx.closedStatement(1)!=null)
       body.add(visit(ctx.closedStatement(1)));

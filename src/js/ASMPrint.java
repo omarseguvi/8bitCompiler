@@ -36,7 +36,7 @@ public class ASMPrint implements ASMAst{
           "\tPOP C\n"+
           "\tPOP A\n"+
           "\tPUSH C\n"+
-    ".number_to_Stack:\t"+
+    ".number_to_Stack:\n"+
           "\tMOV B,A;\n"+
       	  "\tDIV 10;\n"+
         	"\tMUL 10;\n"+
