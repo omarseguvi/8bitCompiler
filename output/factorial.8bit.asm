@@ -19,7 +19,8 @@ fact:
 	PUSH [.fact_n];
 	PUSH [.fact_ra];
 	MOV [.fact_ra],C;
-	MOV [.fact_n],A;if:
+	MOV [.fact_n],A;
+if:
 	PUSH [.fact_n];
 	PUSH 0;
 	POP B;
