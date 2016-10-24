@@ -367,7 +367,10 @@ public List<ASMAst> generateRet(List<ASMAst> params){ //post sala
   retu.add(MOV( ID("C") ,ID("[."+this.simbolTable.getFunActual()+"_ra]")));
   retu.add(POP(ID("B")));
   retu.add(MOV( ID("[."+this.simbolTable.getFunActual()+"_ra]"), ID("B")));
-  params.stream().forEach(e-> retu.add(MOV(e,ID(reg[params.indexOf(e)]))));
+  params.stream().forEach(e-> {
+                    retu.add(POP(ID("B"))) ;
+                    retu.add(MOV(e,ID(reg[params.indexOf(e)])));
+                  } );
   retu.add(PUSH(ID("A")));
   retu.add(PUSH(ID("C")));
   retu.add(RET());

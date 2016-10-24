@@ -17,6 +17,8 @@ salute:
 	PUSH [.salute_ra];
 	MOV [.salute_ra],C;
 	PUSH .salute_String_1;
+	JMP end_salute;
+end_salute:
 	POP A;
 	MOV C,[.salute_ra];
 	POP B;

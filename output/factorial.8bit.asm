@@ -3,52 +3,55 @@
 	MOV D,232;
 	JMP main;
 	.UNDEF: DB 255;
-.compare_data:
-	.compare_x: DB 0;
-	.compare_y: DB 0;
-	.compare_ra: DB 0;
+.fact_data:
+	.fact_n: DB 0;
+	.fact_ra: DB 0;
 .main_data:
-	.main_String_2: DB " 5>10=" 
-	DB 0;
-	.main_String_1: DB "10>5=" 
+	.main_String_1: DB "fact(5)=" 
 	DB 0;
 	.true: DB "true" 
 	DB 0;
 	.false: DB "false" 
 	DB 0;
-compare:
+fact:
 	POP C;
 	POP A;
-	POP B;
-	PUSH [.compare_y];
-	PUSH [.compare_x];
-	PUSH [.compare_ra];
-	MOV [.compare_ra],C;
-	MOV [.compare_y],A;
-	MOV [.compare_x],B;if:
-	PUSH [.compare_x];
-	PUSH [.compare_y];
+	PUSH [.fact_n];
+	PUSH [.fact_ra];
+	MOV [.fact_ra],C;
+	MOV [.fact_n],A;if:
+	PUSH [.fact_n];
+	PUSH 0;
 	POP B;
 	POP A;
 	CMP A,B;
-	JBE out;
-	PUSH 0;
-	JMP end_compare;
+	JE out;
 	JMP return;
 out:
 	PUSH 1;
-	JMP end_compare;
+	JMP end_fact;
 	JMP return;
 return:
-end_compare:
+	PUSH [.fact_n];
+	PUSH [.fact_n];
+	PUSH 1;
+	POP B;
 	POP A;
-	MOV C,[.compare_ra];
+	SUB A,B;
+	PUSH A;
+	CALL fact;
 	POP B;
-	MOV [.compare_ra],B;
+	POP A;
+	MUL B;
+	PUSH A;
+	JMP end_fact;
+end_fact:
+	POP A;
+	MOV C,[.fact_ra];
 	POP B;
-	MOV [.compare_x],A;
+	MOV [.fact_ra],B;
 	POP B;
-	MOV [.compare_y],B;
+	MOV [.fact_n],A;
 	PUSH A;
 	PUSH C;
 	RET;
@@ -120,15 +123,8 @@ print_boolean:
 main:
 	PUSH .main_String_1;
 	CALL print_string;
-	PUSH 10;
 	PUSH 5;
-	CALL compare;
-	CALL print_boolean;
-	PUSH .main_String_2;
-	CALL print_string;
-	PUSH 5;
-	PUSH 10;
-	CALL compare;
-	CALL print_boolean;
+	CALL fact;
+	CALL print_number;
 	HLT;
 	
